@@ -1,0 +1,100 @@
+from django.contrib.auth.models import User
+from rest_framework import serializers
+from rest_framework.authtoken.models import Token
+from rest_framework.validators import UniqueValidator
+
+from auth_app.api.authenticate_user import authenticate_user
+from auth_app.models import UserProfile
+
+
+class RegistrationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for registering a new user.
+
+    Handles incoming registration data, enforces email
+    uniqueness, matches password fields, and creates the User
+    along with a related UserProfile. Returns a token and
+    profile information on output.
+    """
+
+    repeated_password = serializers.CharField(max_length=100, write_only=True)
+    type = serializers.ChoiceField(
+        choices=UserProfile.Type.choices, write_only=True
+    )
+    email = serializers.EmailField(
+        required=True,
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message="Email already exists",
+            )
+        ],
+    )
+    username = serializers.CharField(
+        required=True,
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message="Username already exists",
+            )
+        ],
+    )
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password", "repeated_password", "type"]
+        extra_kwargs = {"password": {"write_only": True}}
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs["repeated_password"]:
+            raise serializers.ValidationError(
+                {"error": "Password and repeated password don't match"}
+            )
+        return attrs
+
+    def create(self, validated_data):
+        profile_type = validated_data.pop("type")
+        validated_data.pop("repeated_password")
+
+        user = User.objects.create_user(
+            username=validated_data["username"],
+            email=validated_data["email"],
+            password=validated_data["password"],
+        )
+
+        UserProfile.objects.create(user=user, type=profile_type)
+
+        return user
+
+    def to_representation(self, instance):
+        """
+        Customize serialization output after user creation.
+
+        Includes an authentication token, the username,
+        email, and user ID in the returned data.
+        """
+        token, created = Token.objects.get_or_create(user=instance)
+        return {
+            "token": token.key,
+            "username": instance.username,
+            "email": instance.email,
+            "user_id": instance.id,
+        }
+
+
+class LoginSerializer(serializers.Serializer):
+    """
+    Serializer for handling user login input and validation.
+
+    Defines the expected fields for login, including username and
+    password.
+    """
+
+    username = serializers.CharField(max_length=255)
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        user = authenticate_user(attrs)
+        attrs["user"] = user
+
+        return attrs
