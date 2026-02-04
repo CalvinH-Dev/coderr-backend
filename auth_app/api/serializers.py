@@ -7,11 +7,63 @@ from auth_app.api.authenticate_user import authenticate_user
 from auth_app.models import UserProfile
 
 
+class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the User model.
+
+    Provides a read-only representation of basic user information
+    including id, username, name, and email.
+    """
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "first_name", "last_name", "email"]
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the UserProfile model.
+
+    Serializes user profile data and automatically includes related
+    User fields (user id, username, email, first_name, last_name) in
+    the output representation. The file field is converted to show
+    only the filename instead of the full path.
+    """
+
+    file = serializers.SerializerMethodField()
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            "file",
+            "location",
+            "tel",
+            "description",
+            "working_hours",
+            "type",
+            "created_at",
+        ]
+
+    def get_file(self, obj):
+        if obj.file:
+            return obj.file.name
+        return None
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["user"] = instance.user.id
+        data["username"] = instance.user.username
+        data["email"] = instance.user.email
+        data["first_name"] = instance.user.first_name
+        data["last_name"] = instance.user.last_name
+        return data
+
+
 class RegistrationSerializer(serializers.ModelSerializer):
     """
     Serializer for registering a new user.
 
-    Handles incoming registration data, enforces email
+    Handles incoming registration data, enforces email and username
     uniqueness, matches password fields, and creates the User
     along with a related UserProfile. Returns a token and
     profile information on output.
@@ -67,12 +119,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return user
 
     def to_representation(self, instance):
-        """
-        Customize serialization output after user creation.
-
-        Includes an authentication token, the username,
-        email, and user ID in the returned data.
-        """
         token, created = Token.objects.get_or_create(user=instance)
         return {
             "token": token.key,
@@ -87,7 +133,7 @@ class LoginSerializer(serializers.Serializer):
     Serializer for handling user login input and validation.
 
     Defines the expected fields for login, including username and
-    password.
+    password. Validates credentials using the authenticate_user function.
     """
 
     username = serializers.CharField(max_length=255)

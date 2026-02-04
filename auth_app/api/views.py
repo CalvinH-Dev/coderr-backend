@@ -3,7 +3,13 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 
-from auth_app.api.serializers import LoginSerializer, RegistrationSerializer
+from auth_app.api.permissions import IsAuthenticatedOr401
+from auth_app.api.serializers import (
+    LoginSerializer,
+    RegistrationSerializer,
+    UserProfileSerializer,
+)
+from auth_app.models import UserProfile
 
 
 class RegistrationView(generics.CreateAPIView):
@@ -49,3 +55,18 @@ class LoginView(ObtainAuthToken):
                 "user_id": user.pk,
             }
         )
+
+
+class ProfileDetailView(generics.RetrieveUpdateAPIView):
+    """
+    API view for retrieving and updating user profiles.
+
+    Allows authenticated users to GET or PATCH a user profile by ID.
+    Returns 401 for unauthenticated requests instead of the default 403.
+    """
+
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticatedOr401]
+    queryset = UserProfile.objects.all()
+    http_method_names = ["get", "patch", "head", "options"]
+    lookup_field = "id"
