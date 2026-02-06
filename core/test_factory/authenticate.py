@@ -22,5 +22,6 @@ class TestDataFactory:
             password=password,
             **kwargs,
         )
+
         client.force_authenticate(user=user)
         return client, user
