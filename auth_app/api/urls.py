@@ -1,6 +1,12 @@
 from django.urls import path
 
-from auth_app.api.views import LoginView, ProfileDetailView, RegistrationView
+from auth_app.api.views import (
+    BusinessProfilesView,
+    CustomerProfilesView,
+    LoginView,
+    ProfileDetailView,
+    RegistrationView,
+)
 
 urlpatterns = [
     path("registration", RegistrationView.as_view(), name="registration"),
@@ -10,4 +16,6 @@ urlpatterns = [
         ProfileDetailView.as_view(),
         name="profile-detail",
     ),
+    path("", BusinessProfilesView.as_view(), name="profile-business-list"),
+    path("", CustomerProfilesView.as_view(), name="profile-customer-list"),
 ]

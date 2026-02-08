@@ -20,28 +20,14 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "first_name", "last_name", "email"]
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the UserProfile model.
-
-    Serializes user profile data and automatically includes related
-    User fields (user id, username, email, first_name, last_name) in
-    the output representation. The file field is converted to show
-    only the filename instead of the full path.
-    """
-
+class BaseUserProfileSerializer(serializers.ModelSerializer):
     file = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
         fields = [
             "file",
-            "location",
-            "tel",
-            "description",
-            "working_hours",
             "type",
-            "created_at",
         ]
 
     def get_file(self, obj):
@@ -53,9 +39,50 @@ class UserProfileSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data["user"] = instance.user.id
         data["username"] = instance.user.username
-        data["email"] = instance.user.email
         data["first_name"] = instance.user.first_name
         data["last_name"] = instance.user.last_name
+        return data
+
+
+class BaseUserProfileBusinessSerializer(BaseUserProfileSerializer):
+    file = serializers.SerializerMethodField()
+
+    class Meta(BaseUserProfileSerializer.Meta):
+        model = UserProfile
+        fields = BaseUserProfileSerializer.Meta.fields + [
+            "location",
+            "tel",
+            "description",
+            "working_hours",
+        ]
+
+
+class UserProfileCustomerSerializer(BaseUserProfileSerializer):
+    class Meta(BaseUserProfileSerializer.Meta):
+        fields = BaseUserProfileSerializer.Meta.fields + ["created_at"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["email"] = instance.user.email
+        return data
+
+
+class UserProfileBusinessSerializer(BaseUserProfileBusinessSerializer):
+    """
+    Serializer for the UserProfile model.
+
+    Serializes user profile data and automatically includes related
+    User fields (user id, username, email, first_name, last_name) in
+    the output representation. The file field is converted to show
+    only the filename instead of the full path.
+    """
+
+    class Meta(BaseUserProfileBusinessSerializer.Meta):
+        fields = BaseUserProfileBusinessSerializer.Meta.fields + ["created_at"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["email"] = instance.user.email
         return data
 
 

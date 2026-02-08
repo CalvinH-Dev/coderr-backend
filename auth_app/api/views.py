@@ -5,9 +5,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from auth_app.api.serializers import (
+    BaseUserProfileBusinessSerializer,
+    BaseUserProfileSerializer,
     LoginSerializer,
     RegistrationSerializer,
-    UserProfileSerializer,
+    UserProfileBusinessSerializer,
 )
 from auth_app.models import UserProfile
 
@@ -65,7 +67,19 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
     Returns 401 for unauthenticated requests.
     """
 
-    serializer_class = UserProfileSerializer
+    serializer_class = UserProfileBusinessSerializer
     permission_classes = [IsAuthenticated]
     queryset = UserProfile.objects.all()
     lookup_field = "id"
+
+
+class BusinessProfilesView(generics.ListAPIView):
+    serializer_class = BaseUserProfileBusinessSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = UserProfile.objects.all()
+
+
+class CustomerProfilesView(generics.ListAPIView):
+    serializer_class = BaseUserProfileSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = UserProfile.objects.all()
