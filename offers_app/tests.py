@@ -1,10 +1,7 @@
-from http.client import HTTPResponse
-
 from django.http import HttpResponse
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.authtoken.admin import User
-from rest_framework.response import Response
 from rest_framework.test import APITestCase
 
 from auth_app.models import UserProfile
@@ -89,7 +86,7 @@ class TestOfferDetailsView(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
-        self.assertEqual(data["id"], self.offer.id)
+        self.assertEqual(data["id"], self.offer.id)  # type: ignore
         self.assertEqual(data["title"], "Offer Title")
         self.assertEqual(data["delivery_time_in_days"], 5)
         self.assertEqual(data["offer_type"], "basic")
