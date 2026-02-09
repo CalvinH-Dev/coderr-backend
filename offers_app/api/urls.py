@@ -4,7 +4,7 @@ from rest_framework.routers import SimpleRouter
 from offers_app.api.views import OfferDetailView, OffersViewSet
 
 router = SimpleRouter()
-router.register(r"offers", OffersViewSet, basename="offers")
+router.register(r"offers", OffersViewSet, basename="offerpackage")
 
 urlpatterns = router.urls
 

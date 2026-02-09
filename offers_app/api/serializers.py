@@ -11,7 +11,10 @@ class BaseOfferSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Offer
-        fields = ["id", "url"]
+        fields = [
+            "id",
+            "url",
+        ]
 
 
 class RetrieveOfferSerializer(serializers.ModelSerializer):
@@ -28,8 +31,10 @@ class RetrieveOfferSerializer(serializers.ModelSerializer):
         ]
 
 
-class BaseOfferPackageSerializer(serializers.ModelSerializer):
+class RetrieveOfferPackageSerializer(serializers.ModelSerializer):
     details = BaseOfferSerializer(many=True, source="offers", read_only=True)
+    min_price = serializers.SerializerMethodField()
+    min_delivery_time = serializers.SerializerMethodField()
 
     class Meta:
         model = OfferPackage
@@ -42,4 +47,18 @@ class BaseOfferPackageSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "details",
+            "min_price",
+            "min_delivery_time",
         ]
+
+    def get_min_price(self, obj):
+        offers = obj.offers.all()
+        if not offers:
+            return None
+        return min(offer.price for offer in offers)
+
+    def get_min_delivery_time(self, obj):
+        offers = obj.offers.all()
+        if not offers:
+            return None
+        return min(offer.delivery_time_in_days for offer in offers)
