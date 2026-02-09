@@ -1,5 +1,7 @@
+from django.urls import reverse
 from rest_framework import serializers
 
+from auth_app.api.serializers import UserDetailsSerializer
 from offers_app.models import Offer, OfferPackage
 
 
@@ -17,6 +19,18 @@ class BaseOfferSerializer(serializers.ModelSerializer):
         ]
 
 
+class BaseOfferSerializerShortURL(BaseOfferSerializer):
+    url = serializers.SerializerMethodField(read_only=True)
+
+    class Meta(BaseOfferSerializer.Meta):
+        model = Offer
+        fields = BaseOfferSerializer.Meta.fields + []
+
+    def get_url(self, obj):
+        url = reverse("offer-detail", kwargs={"pk": obj.pk})
+        return url.removeprefix("/api")
+
+
 class RetrieveOfferSerializer(serializers.ModelSerializer):
     class Meta:
         model = Offer
@@ -31,8 +45,7 @@ class RetrieveOfferSerializer(serializers.ModelSerializer):
         ]
 
 
-class RetrieveOfferPackageSerializer(serializers.ModelSerializer):
-    details = BaseOfferSerializer(many=True, source="offers", read_only=True)
+class BaseOfferPackageSerializer(serializers.ModelSerializer):
     min_price = serializers.SerializerMethodField()
     min_delivery_time = serializers.SerializerMethodField()
 
@@ -46,7 +59,6 @@ class RetrieveOfferPackageSerializer(serializers.ModelSerializer):
             "description",
             "created_at",
             "updated_at",
-            "details",
             "min_price",
             "min_delivery_time",
         ]
@@ -62,3 +74,23 @@ class RetrieveOfferPackageSerializer(serializers.ModelSerializer):
         if not offers:
             return None
         return min(offer.delivery_time_in_days for offer in offers)
+
+
+class ListOfferPackageSerializer(BaseOfferPackageSerializer):
+    details = BaseOfferSerializerShortURL(
+        many=True, source="offers", read_only=True
+    )
+    user_details = UserDetailsSerializer(source="user", read_only=True)
+
+    class Meta(BaseOfferPackageSerializer.Meta):
+        fields = BaseOfferPackageSerializer.Meta.fields + [
+            "details",
+            "user_details",
+        ]
+
+
+class RetrieveOfferPackageSerializer(BaseOfferPackageSerializer):
+    details = BaseOfferSerializer(many=True, source="offers", read_only=True)
+
+    class Meta(BaseOfferPackageSerializer.Meta):
+        fields = BaseOfferPackageSerializer.Meta.fields + ["details"]

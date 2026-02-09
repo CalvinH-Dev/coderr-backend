@@ -20,6 +20,12 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "first_name", "last_name", "email"]
 
 
+class UserDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "username"]
+
+
 class BaseUserProfileSerializer(serializers.ModelSerializer):
     file = serializers.SerializerMethodField()
 

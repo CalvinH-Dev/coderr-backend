@@ -1,10 +1,9 @@
 from django.db import models
-
-from auth_app.models import UserProfile
+from rest_framework.authtoken.admin import User
 
 
 class OfferPackage(models.Model):
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     image = models.FileField(upload_to="", blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, default="")
