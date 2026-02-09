@@ -38,7 +38,7 @@ class TestOfferPackageViewSet(APITestCase):
         response: HttpResponse = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
-        self.assertEqual(data[0]["user"], self.offer_package.user.id)
+        self.assertEqual(data[0]["user"], self.offer_package.user.id)  # type: ignore
         self.assertEqual(data[0]["title"], self.offer_package.title)
         self.assertEqual(
             data[0]["description"], self.offer_package.description
