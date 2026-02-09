@@ -16,6 +16,14 @@ urlpatterns = [
         ProfileDetailView.as_view(),
         name="profile-detail",
     ),
-    path("", BusinessProfilesView.as_view(), name="profile-business-list"),
-    path("", CustomerProfilesView.as_view(), name="profile-customer-list"),
+    path(
+        "profile/business/",
+        BusinessProfilesView.as_view(),
+        name="profile-business-list",
+    ),
+    path(
+        "profile/customer/",
+        CustomerProfilesView.as_view(),
+        name="profile-customer-list",
+    ),
 ]
