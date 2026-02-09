@@ -71,7 +71,7 @@ class TestOfferPackageViewSet(APITestCase):
 
     def test_offer_retrieve_not_authenticated(self):
         self.client.force_authenticate(user=None)  # type: ignore
-        url = reverse("offerpackage-detail", None, kwargs={"pk": 999})
+        url = reverse("offerpackage-detail", None, kwargs={"pk": 1})
         response: HttpResponse = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
