@@ -20,7 +20,7 @@ class Offer(models.Model):
     title = models.CharField(max_length=255)
     delivery_time_in_days = models.IntegerField()
     offer_type = models.CharField(max_length=8, choices=Type.choices)
-    price = models.IntegerField(blank=True, null=True)
+    price = models.FloatField(blank=True, null=True)
     features = models.JSONField(default=list, blank=True)
     package = models.ForeignKey(
         OfferPackage, on_delete=models.CASCADE, related_name="offers"

@@ -4,7 +4,6 @@ from rest_framework import status
 from rest_framework.authtoken.admin import User
 from rest_framework.test import APITestCase
 
-from auth_app.models import UserProfile
 from core.test_factory.authenticate import TestDataFactory
 from offers_app.models import Offer, OfferPackage
 
@@ -16,6 +15,13 @@ class TestOfferPackageViewSet(APITestCase):
             email="john@example.com",
             first_name="John",
             last_name="Doe",
+        )
+
+        user_2 = User.objects.create(
+            username="exampleUsername",
+            email="username@example.com",
+            first_name="Example",
+            last_name="Username",
         )
         self.offer_package = OfferPackage.objects.create(
             user=self.user, title="Package Title"
@@ -29,12 +35,31 @@ class TestOfferPackageViewSet(APITestCase):
             package=self.offer_package,
         )
         Offer.objects.create(
-            title="Offer Title",
+            title="Offer Title 2",
             delivery_time_in_days=10,
             price=20,
             offer_type="basic",
             features=["WebDev", "Anderes"],
             package=self.offer_package,
+        )
+        offer_package_2 = OfferPackage.objects.create(
+            user=user_2, title="Advanced Title"
+        )
+        Offer.objects.create(
+            title="Offer Title",
+            delivery_time_in_days=3,
+            price=35,
+            offer_type="basic",
+            features=["WebDev", "Anderes"],
+            package=offer_package_2,
+        )
+        Offer.objects.create(
+            title="Offer Title 2",
+            delivery_time_in_days=15,
+            price=50,
+            offer_type="basic",
+            features=["WebDev", "Anderes"],
+            package=offer_package_2,
         )
 
     def test_offer_retrieve_ok(self):
@@ -69,27 +94,31 @@ class TestOfferPackageViewSet(APITestCase):
         response: HttpResponse = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
-        self.assertEqual(data["count"], 1)
+        self.assertEqual(data["count"], 2)
         self.assertEqual(data["next"], None)
         self.assertEqual(data["previous"], None)
         result_data = data["results"][0]
-        self.assertEqual(result_data["user"], self.offer_package.user.id)  # type: ignore
-        self.assertEqual(result_data["title"], self.offer_package.title)
+        self.assertEqual(result_data["user"], 2)  # type: ignore
+        self.assertEqual(result_data["title"], "Advanced Title")
         self.assertEqual(
             result_data["description"], self.offer_package.description
         )
         self.assertEqual(result_data["image"], self.offer_package.image)
-        self.assertEqual(result_data["min_price"], 10)
-        self.assertEqual(result_data["min_delivery_time"], 5)
+        self.assertEqual(result_data["min_price"], 35.0)
+        self.assertEqual(result_data["min_delivery_time"], 3)
         self.assertEqual(
             result_data["user_details"],
-            {"first_name": "John", "last_name": "Doe", "username": "john_doe"},
+            {
+                "first_name": "Example",
+                "last_name": "Username",
+                "username": "exampleUsername",
+            },
         )
         self.assertEqual(
             result_data["details"],
             [
-                {"id": 1, "url": "/offerdetails/1/"},
-                {"id": 2, "url": "/offerdetails/2/"},
+                {"id": 3, "url": "/offerdetails/3/"},
+                {"id": 4, "url": "/offerdetails/4/"},
             ],
         )
 
@@ -100,14 +129,23 @@ class TestOfferPackageViewSet(APITestCase):
         self.client.force_authenticate(user=None)  # type: ignore
         url_1 = reverse("offerpackage-list") + "?creator_id=1"
         url_2 = reverse("offerpackage-list") + "?creator_id=2"
+        url_min_price = reverse("offerpackage-list") + "?min_price=25"
+        url_search = reverse("offerpackage-list") + "?search=Advanced"
         response_1 = self.client.get(url_1)
         response_2 = self.client.get(url_2)
+        response_min_price = self.client.get(url_min_price)
+        response_search = self.client.get(url_search)
         self.assertEqual(response_1.status_code, status.HTTP_200_OK)
         self.assertEqual(response_2.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_min_price.status_code, status.HTTP_200_OK)
         data_1 = response_1.json()
         data_2 = response_2.json()
+        data_min_price = response_min_price.json()
+        data_search = response_search.json()
         self.assertEqual(data_1["count"], 1)
-        self.assertEqual(data_2["count"], 0)
+        self.assertEqual(data_2["count"], 1)
+        self.assertEqual(data_min_price["count"], 1)
+        self.assertEqual(data_search["count"], 1)
 
 
 class TestOfferDetailsView(APITestCase):
