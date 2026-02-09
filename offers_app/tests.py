@@ -1,6 +1,10 @@
+from http.client import HTTPResponse
+
+from django.http import HttpResponse
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.authtoken.admin import User
+from rest_framework.response import Response
 from rest_framework.test import APITestCase
 
 from auth_app.models import UserProfile
@@ -24,7 +28,7 @@ class TestOfferPackageViewSet(APITestCase):
         self.offer_package = OfferPackage.objects.create(
             user=user_profile, title="Package Title"
         )
-        offer = Offer.objects.create(
+        Offer.objects.create(
             title="Offer Title",
             delivery_time_in_days=5,
             offer_type="basic",
@@ -34,16 +38,17 @@ class TestOfferPackageViewSet(APITestCase):
 
     def test_offers_list_ok(self):
         url = reverse("offers-list")
-        response = self.client.get(url)
+        response: HttpResponse = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data[0]["user"], self.offer_package.user.id)
-        self.assertEqual(response.data[0]["title"], self.offer_package.title)
+        data = response.json()
+        self.assertEqual(data[0]["user"], self.offer_package.user.id)
+        self.assertEqual(data[0]["title"], self.offer_package.title)
         self.assertEqual(
-            response.data[0]["description"], self.offer_package.description
+            data[0]["description"], self.offer_package.description
         )
-        self.assertEqual(response.data[0]["image"], self.offer_package.image)
-        self.assertIsNotNone(response.data[0]["created_at"])
-        self.assertIsNotNone(response.data[0]["updated_at"])
+        self.assertEqual(data[0]["image"], self.offer_package.image)
+        self.assertIsNotNone(data[0]["created_at"])
+        self.assertIsNotNone(data[0]["updated_at"])
 
 
 class TestOfferDetailsView(APITestCase):
@@ -83,9 +88,10 @@ class TestOfferDetailsView(APITestCase):
         url = reverse("offer-detail", None, kwargs={"pk": 1})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["id"], self.offer.id)
-        self.assertEqual(response.data["title"], "Offer Title")
-        self.assertEqual(response.data["delivery_time_in_days"], 5)
-        self.assertEqual(response.data["offer_type"], "basic")
-        self.assertEqual(response.data["price"], 1.05)
-        self.assertEqual(response.data["features"], ["WebDev", "Anderes"])
+        data = response.json()
+        self.assertEqual(data["id"], self.offer.id)
+        self.assertEqual(data["title"], "Offer Title")
+        self.assertEqual(data["delivery_time_in_days"], 5)
+        self.assertEqual(data["offer_type"], "basic")
+        self.assertEqual(data["price"], 1.05)
+        self.assertEqual(data["features"], ["WebDev", "Anderes"])

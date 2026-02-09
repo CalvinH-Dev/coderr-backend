@@ -99,8 +99,9 @@ class LoginTest(APITestCase):
         url = reverse("login")
         response = self.client.post(url, self.user_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["token"], self.token)  # type: ignore
-        self.assertEqual(response.data["username"], "exampleUsername")  # type: ignore
+        data = response.json()
+        self.assertEqual(data["token"], self.token)
+        self.assertEqual(data["username"], "exampleUsername")
 
     def test_login_wrong_password(self):
         url = reverse("login")

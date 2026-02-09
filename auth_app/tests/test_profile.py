@@ -31,18 +31,19 @@ class RetrieveProfileTest(APITestCase):
         url = reverse("profile-detail", None, kwargs={"id": 1})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["user"], 1)  # type: ignore
-        self.assertEqual(response.data["username"], "john_doe")  # type: ignore
-        self.assertEqual(response.data["first_name"], "John")  # type: ignore
-        self.assertEqual(response.data["last_name"], "Doe")  # type: ignore
-        self.assertEqual(response.data["file"], "profile_picture.jpg")  # type: ignore
-        self.assertEqual(response.data["location"], "Berlin")  # type: ignore
-        self.assertEqual(response.data["tel"], "123456789")  # type: ignore
-        self.assertEqual(response.data["description"], "Business description")  # type: ignore
-        self.assertEqual(response.data["working_hours"], "9-17")  # type: ignore
-        self.assertEqual(response.data["type"], "business")  # type: ignore
-        self.assertEqual(response.data["email"], "john@example.com")  # type: ignore
-        self.assertIsNotNone(response.data["created_at"])  # type: ignore
+        data = response.json()
+        self.assertEqual(data["user"], 1)  # type: ignore
+        self.assertEqual(data["username"], "john_doe")  # type: ignore
+        self.assertEqual(data["first_name"], "John")  # type: ignore
+        self.assertEqual(data["last_name"], "Doe")  # type: ignore
+        self.assertEqual(data["file"], "profile_picture.jpg")  # type: ignore
+        self.assertEqual(data["location"], "Berlin")  # type: ignore
+        self.assertEqual(data["tel"], "123456789")  # type: ignore
+        self.assertEqual(data["description"], "Business description")  # type: ignore
+        self.assertEqual(data["working_hours"], "9-17")  # type: ignore
+        self.assertEqual(data["type"], "business")  # type: ignore
+        self.assertEqual(data["email"], "john@example.com")  # type: ignore
+        self.assertIsNotNone(data["created_at"])  # type: ignore
 
     def test_retrieve_profile_not_authenticated(self):
         self.client.force_authenticate(user=None)  # type: ignore
@@ -81,17 +82,17 @@ class RetrieveBusinessProfilesTest(APITestCase):
         url = reverse("profile-business-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        list = response.data  # type: ignore
-        self.assertEqual(list[0]["user"], 1)
-        self.assertEqual(list[0]["username"], "john_doe")
-        self.assertEqual(list[0]["first_name"], "John")
-        self.assertEqual(list[0]["last_name"], "Doe")
-        self.assertEqual(list[0]["file"], "profile_picture.jpg")
-        self.assertEqual(list[0]["location"], "Berlin")
-        self.assertEqual(list[0]["tel"], "123456789")
-        self.assertEqual(list[0]["description"], "Business description")
-        self.assertEqual(list[0]["working_hours"], "9-17")
-        self.assertEqual(list[0]["type"], "business")
+        data = response.json()
+        self.assertEqual(data[0]["user"], 1)
+        self.assertEqual(data[0]["username"], "john_doe")
+        self.assertEqual(data[0]["first_name"], "John")
+        self.assertEqual(data[0]["last_name"], "Doe")
+        self.assertEqual(data[0]["file"], "profile_picture.jpg")
+        self.assertEqual(data[0]["location"], "Berlin")
+        self.assertEqual(data[0]["tel"], "123456789")
+        self.assertEqual(data[0]["description"], "Business description")
+        self.assertEqual(data[0]["working_hours"], "9-17")
+        self.assertEqual(data[0]["type"], "business")
 
 
 class RetrieveCustomerProfilesTest(APITestCase):
@@ -113,10 +114,10 @@ class RetrieveCustomerProfilesTest(APITestCase):
         url = reverse("profile-customer-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        list = response.data  # type: ignore
-        self.assertEqual(list[0]["user"], 1)
-        self.assertEqual(list[0]["username"], "john_doe")
-        self.assertEqual(list[0]["first_name"], "John")
-        self.assertEqual(list[0]["last_name"], "Doe")
-        self.assertEqual(list[0]["file"], "profile_picture.jpg")
-        self.assertEqual(list[0]["type"], "customer")
+        data = response.json()
+        self.assertEqual(data[0]["user"], 1)
+        self.assertEqual(data[0]["username"], "john_doe")
+        self.assertEqual(data[0]["first_name"], "John")
+        self.assertEqual(data[0]["last_name"], "Doe")
+        self.assertEqual(data[0]["file"], "profile_picture.jpg")
+        self.assertEqual(data[0]["type"], "customer")
