@@ -5,35 +5,78 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('auth_app', '0002_userprofile_file'),
+        ("auth_app", "0002_userprofile_file"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='OfferPackage',
+            name="OfferPackage",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=255)),
-                ('image', models.FileField(blank=True, null=True, upload_to='')),
-                ('description', models.CharField(blank=True, default='', max_length=255)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='auth_app.userprofile')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=255)),
+                (
+                    "image",
+                    models.FileField(blank=True, null=True, upload_to=""),
+                ),
+                (
+                    "description",
+                    models.CharField(blank=True, default="", max_length=255),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="auth_app.userprofile",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Offer',
+            name="Offer",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=255)),
-                ('delivery_time_in_days', models.IntegerField()),
-                ('offer_type', models.CharField(choices=[('basic', 'basic'), ('standard', 'standard'), ('premium', 'premium')], max_length=8)),
-                ('features', models.JSONField(blank=True, default=list)),
-                ('package', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='offers_app.offerpackage')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=255)),
+                ("delivery_time_in_days", models.IntegerField()),
+                (
+                    "offer_type",
+                    models.CharField(
+                        choices=[
+                            ("basic", "basic"),
+                            ("standard", "standard"),
+                            ("premium", "premium"),
+                        ],
+                        max_length=8,
+                    ),
+                ),
+                ("features", models.JSONField(blank=True, default=list)),
+                (
+                    "package",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="offers_app.offerpackage",
+                    ),
+                ),
             ],
         ),
     ]

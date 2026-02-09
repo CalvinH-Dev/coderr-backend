@@ -68,27 +68,46 @@ class TestOfferPackageViewSet(APITestCase):
         url = reverse("offerpackage-list")
         response: HttpResponse = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.json()[0]
-        self.assertEqual(data["user"], self.offer_package.user.id)  # type: ignore
-        self.assertEqual(data["title"], self.offer_package.title)
-        self.assertEqual(data["description"], self.offer_package.description)
-        self.assertEqual(data["image"], self.offer_package.image)
-        self.assertEqual(data["min_price"], 10)
-        self.assertEqual(data["min_delivery_time"], 5)
+        data = response.json()
+        self.assertEqual(data["count"], 1)
+        self.assertEqual(data["next"], None)
+        self.assertEqual(data["previous"], None)
+        result_data = data["results"][0]
+        self.assertEqual(result_data["user"], self.offer_package.user.id)  # type: ignore
+        self.assertEqual(result_data["title"], self.offer_package.title)
         self.assertEqual(
-            data["user_details"],
+            result_data["description"], self.offer_package.description
+        )
+        self.assertEqual(result_data["image"], self.offer_package.image)
+        self.assertEqual(result_data["min_price"], 10)
+        self.assertEqual(result_data["min_delivery_time"], 5)
+        self.assertEqual(
+            result_data["user_details"],
             {"first_name": "John", "last_name": "Doe", "username": "john_doe"},
         )
         self.assertEqual(
-            data["details"],
+            result_data["details"],
             [
                 {"id": 1, "url": "/offerdetails/1/"},
                 {"id": 2, "url": "/offerdetails/2/"},
             ],
         )
 
-        self.assertIsNotNone(data["created_at"])
-        self.assertIsNotNone(data["updated_at"])
+        self.assertIsNotNone(result_data["created_at"])
+        self.assertIsNotNone(result_data["updated_at"])
+
+    def test_offer_list_filtering(self):
+        self.client.force_authenticate(user=None)  # type: ignore
+        url_1 = reverse("offerpackage-list") + "?creator_id=1"
+        url_2 = reverse("offerpackage-list") + "?creator_id=2"
+        response_1 = self.client.get(url_1)
+        response_2 = self.client.get(url_2)
+        self.assertEqual(response_1.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_2.status_code, status.HTTP_200_OK)
+        data_1 = response_1.json()
+        data_2 = response_2.json()
+        self.assertEqual(data_1["count"], 1)
+        self.assertEqual(data_2["count"], 0)
 
 
 class TestOfferDetailsView(APITestCase):

@@ -5,20 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('offers_app', '0001_initial'),
+        ("offers_app", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='offer',
-            name='price',
+            model_name="offer",
+            name="price",
             field=models.FloatField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='offer',
-            name='package',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='offers', to='offers_app.offerpackage'),
+            model_name="offer",
+            name="package",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="offers",
+                to="offers_app.offerpackage",
+            ),
         ),
     ]

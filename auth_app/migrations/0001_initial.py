@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -15,16 +14,51 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='UserProfile',
+            name="UserProfile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('location', models.CharField(blank=True, default='', max_length=100)),
-                ('tel', models.CharField(blank=True, default='', max_length=20)),
-                ('type', models.CharField(choices=[('customer', 'Customer'), ('business', 'Business')], max_length=8)),
-                ('description', models.CharField(blank=True, default='', max_length=255)),
-                ('working_hours', models.CharField(blank=True, default='', max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "location",
+                    models.CharField(blank=True, default="", max_length=100),
+                ),
+                (
+                    "tel",
+                    models.CharField(blank=True, default="", max_length=20),
+                ),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("customer", "Customer"),
+                            ("business", "Business"),
+                        ],
+                        max_length=8,
+                    ),
+                ),
+                (
+                    "description",
+                    models.CharField(blank=True, default="", max_length=255),
+                ),
+                (
+                    "working_hours",
+                    models.CharField(blank=True, default="", max_length=20),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]
