@@ -1,7 +1,7 @@
 from rest_framework.generics import RetrieveAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import ModelViewSet
 
 from offers_app.api.serializers import (
     RetrieveOfferPackageSerializer,
@@ -16,20 +16,18 @@ class OfferDetailView(RetrieveAPIView):
     serializer_class = RetrieveOfferSerializer
 
 
-class OffersViewSet(ViewSet):
+class OffersViewSet(ModelViewSet):
     queryset = OfferPackage.objects.all()
 
-    def list(self, request):
-        queryset = OfferPackage.objects.all()
-        serializer = RetrieveOfferPackageSerializer(
-            queryset, many=True, context={"request": request}
-        )
-        return Response(serializer.data)
+    def get_permissions(self):
+        if self.action == "retrieve":
+            return [IsAuthenticated()]
 
-    def retrieve(self, request, pk=None):
-        queryset = OfferPackage.objects.all()
-        user = get_object_or_404(queryset, pk=pk)
-        serializer = RetrieveOfferPackageSerializer(
-            user, context={"request": request}
-        )
-        return Response(serializer.data)
+        return super().get_permissions()
+
+    def get_serializer_class(self):
+        if self.action in ("list", "create"):
+            return RetrieveOfferPackageSerializer
+        if self.action == "retrieve":
+            return RetrieveOfferPackageSerializer
+        return RetrieveOfferPackageSerializer

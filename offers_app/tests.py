@@ -11,16 +11,23 @@ from offers_app.models import Offer, OfferPackage
 
 class TestOfferPackageViewSet(APITestCase):
     def setUp(self):
-        self.user_data = {
-            "username": "exampleUsername",
-            "password": "examplePassword",
-        }
-        self.user = User.objects.create_user(
-            email="example@mail.de",
-            **self.user_data,
+        self.client, self.user = TestDataFactory.create_authenticated_client(
+            username="john_doe",
+            email="john@example.com",
+            first_name="John",
+            last_name="Doe",
         )
+        self.profile_data = {
+            "file": "profile_picture.jpg",
+            "location": "Berlin",
+            "tel": "123456789",
+            "description": "Business description",
+            "working_hours": "9-17",
+            "type": "business",
+        }
+
         user_profile = UserProfile.objects.create(
-            user=self.user, type="customer"
+            user=self.user, **self.profile_data
         )
         self.offer_package = OfferPackage.objects.create(
             user=user_profile, title="Package Title"
@@ -56,6 +63,17 @@ class TestOfferPackageViewSet(APITestCase):
 
         self.assertIsNotNone(data["created_at"])
         self.assertIsNotNone(data["updated_at"])
+
+    def test_offer_retrieve_wrong_id(self):
+        url = reverse("offerpackage-detail", None, kwargs={"pk": 999})
+        response: HttpResponse = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_offer_retrieve_not_authenticated(self):
+        self.client.force_authenticate(user=None)  # type: ignore
+        url = reverse("offerpackage-detail", None, kwargs={"pk": 999})
+        response: HttpResponse = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class TestOfferDetailsView(APITestCase):

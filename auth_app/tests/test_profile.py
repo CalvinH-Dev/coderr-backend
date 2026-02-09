@@ -30,18 +30,18 @@ class RetrieveProfileTest(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
-        self.assertEqual(data["user"], 1)  # type: ignore
-        self.assertEqual(data["username"], "john_doe")  # type: ignore
-        self.assertEqual(data["first_name"], "John")  # type: ignore
-        self.assertEqual(data["last_name"], "Doe")  # type: ignore
-        self.assertEqual(data["file"], "profile_picture.jpg")  # type: ignore
-        self.assertEqual(data["location"], "Berlin")  # type: ignore
-        self.assertEqual(data["tel"], "123456789")  # type: ignore
-        self.assertEqual(data["description"], "Business description")  # type: ignore
-        self.assertEqual(data["working_hours"], "9-17")  # type: ignore
-        self.assertEqual(data["type"], "business")  # type: ignore
-        self.assertEqual(data["email"], "john@example.com")  # type: ignore
-        self.assertIsNotNone(data["created_at"])  # type: ignore
+        self.assertEqual(data["user"], 1)
+        self.assertEqual(data["username"], "john_doe")
+        self.assertEqual(data["first_name"], "John")
+        self.assertEqual(data["last_name"], "Doe")
+        self.assertEqual(data["file"], "profile_picture.jpg")
+        self.assertEqual(data["location"], "Berlin")
+        self.assertEqual(data["tel"], "123456789")
+        self.assertEqual(data["description"], "Business description")
+        self.assertEqual(data["working_hours"], "9-17")
+        self.assertEqual(data["type"], "business")
+        self.assertEqual(data["email"], "john@example.com")
+        self.assertIsNotNone(data["created_at"])
 
     def test_retrieve_profile_not_authenticated(self):
         self.client.force_authenticate(user=None)  # type: ignore
