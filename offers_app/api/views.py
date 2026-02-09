@@ -2,6 +2,7 @@ from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
+from auth_app.api.permissions import IsBusinessUser
 from offers_app.api.pagination import (
     OfferPackageSetPagination,
 )
@@ -13,6 +14,7 @@ from offers_app.api.query import (
     get_query_param_values,
 )
 from offers_app.api.serializers import (
+    CreateOfferPackageSerializer,
     ListOfferPackageSerializer,
     RetrieveOfferPackageSerializer,
     RetrieveOfferSerializer,
@@ -56,11 +58,16 @@ class OffersViewSet(ModelViewSet):
         if self.action == "list":
             return [AllowAny()]
 
+        if self.action == "create":
+            return [AllowAny()]
+
         return super().get_permissions()
 
     def get_serializer_class(self):
-        if self.action in ("list", "create"):
+        if self.action == "list":
             return ListOfferPackageSerializer
         if self.action == "retrieve":
             return RetrieveOfferPackageSerializer
+        if self.action == "create":
+            return CreateOfferPackageSerializer
         return RetrieveOfferPackageSerializer

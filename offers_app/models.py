@@ -18,6 +18,7 @@ class Offer(models.Model):
         PREMIUM = "premium", "premium"
 
     title = models.CharField(max_length=255)
+    revisions = models.IntegerField(blank=True, null=True)
     delivery_time_in_days = models.IntegerField()
     offer_type = models.CharField(max_length=8, choices=Type.choices)
     price = models.FloatField(blank=True, null=True)

@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.authtoken.admin import User
 from rest_framework.test import APITestCase
 
+from auth_app.models import UserProfile
 from core.test_factory.authenticate import TestDataFactory
 from offers_app.models import Offer, OfferPackage
 
@@ -15,6 +16,16 @@ class TestOfferPackageViewSet(APITestCase):
             email="john@example.com",
             first_name="John",
             last_name="Doe",
+        )
+
+        self.business_user_profile = UserProfile.objects.create(
+            user=self.user,
+            type="business",
+            tel="123456789",
+            location="Berlin",
+            description="Business User",
+            file="laughing.jpg",
+            working_hours="5-17",
         )
 
         user_2 = User.objects.create(
@@ -146,6 +157,90 @@ class TestOfferPackageViewSet(APITestCase):
         self.assertEqual(data_2["count"], 1)
         self.assertEqual(data_min_price["count"], 1)
         self.assertEqual(data_search["count"], 1)
+
+    def test_offer_create_ok(self):  # type: ignore
+        offer = {
+            "title": "Grafikdesign-Paket",
+            "image": None,
+            "description": "Ein umfassendes Grafikdesign-Paket für Unternehmen.",
+            "details": [
+                {
+                    "title": "Basic Design",
+                    "revisions": 2,
+                    "delivery_time_in_days": 5,
+                    "price": 100,
+                    "features": ["Logo Design", "Visitenkarte"],
+                    "offer_type": "basic",
+                },
+                {
+                    "title": "Standard Design",
+                    "revisions": 5,
+                    "delivery_time_in_days": 7,
+                    "price": 200,
+                    "features": ["Logo Design", "Visitenkarte", "Briefpapier"],
+                    "offer_type": "standard",
+                },
+                {
+                    "title": "Premium Design",
+                    "revisions": 10,
+                    "delivery_time_in_days": 10,
+                    "price": 500,
+                    "features": [
+                        "Logo Design",
+                        "Visitenkarte",
+                        "Briefpapier",
+                        "Flyer",
+                    ],
+                    "offer_type": "premium",
+                },
+            ],
+        }
+
+        url = reverse("offerpackage-list")
+        response = self.client.post(url, offer, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        expected_data = {
+            "id": 3,
+            "title": "Grafikdesign-Paket",
+            "image": None,
+            "description": "Ein umfassendes Grafikdesign-Paket für Unternehmen.",
+            "details": [
+                {
+                    "id": 5,
+                    "title": "Basic Design",
+                    "revisions": 2,
+                    "delivery_time_in_days": 5,
+                    "price": 100,
+                    "features": ["Logo Design", "Visitenkarte"],
+                    "offer_type": "basic",
+                },
+                {
+                    "id": 6,
+                    "title": "Standard Design",
+                    "revisions": 5,
+                    "delivery_time_in_days": 7,
+                    "price": 200,
+                    "features": ["Logo Design", "Visitenkarte", "Briefpapier"],
+                    "offer_type": "standard",
+                },
+                {
+                    "id": 7,
+                    "title": "Premium Design",
+                    "revisions": 10,
+                    "delivery_time_in_days": 10,
+                    "price": 500,
+                    "features": [
+                        "Logo Design",
+                        "Visitenkarte",
+                        "Briefpapier",
+                        "Flyer",
+                    ],
+                    "offer_type": "premium",
+                },
+            ],
+        }
+        data = response.json()
+        self.assertEqual(data, expected_data)
 
 
 class TestOfferDetailsView(APITestCase):

@@ -1,5 +1,7 @@
 from django.urls import reverse
 from rest_framework import serializers
+from rest_framework.authtoken.admin import User
+from rest_framework.fields import CurrentUserDefault
 
 from auth_app.api.serializers import UserDetailsSerializer
 from offers_app.models import Offer, OfferPackage
@@ -29,6 +31,20 @@ class BaseOfferSerializerShortURL(BaseOfferSerializer):
     def get_url(self, obj):
         url = reverse("offer-detail", kwargs={"pk": obj.pk})
         return url.removeprefix("/api")
+
+
+class CreateOfferSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Offer
+        fields = [
+            "id",
+            "title",
+            "revisions",
+            "delivery_time_in_days",
+            "price",
+            "features",
+            "offer_type",
+        ]
 
 
 class RetrieveOfferSerializer(serializers.ModelSerializer):
@@ -101,3 +117,25 @@ class RetrieveOfferPackageSerializer(BaseOfferPackageSerializer):
 
     class Meta(BaseOfferPackageSerializer.Meta):
         fields = BaseOfferPackageSerializer.Meta.fields + ["details"]
+
+
+class CreateOfferPackageSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(
+        default=CurrentUserDefault(), write_only=True
+    )
+    image = serializers.ImageField(required=False, allow_null=True)
+    details = CreateOfferSerializer(many=True, source="offers")
+
+    class Meta:
+        model = OfferPackage
+        fields = ["id", "user", "title", "image", "description", "details"]
+
+    def create(self, validated_data):
+        offers_data = validated_data.pop("offers")
+
+        offer_package = OfferPackage.objects.create(**validated_data)
+
+        for offer_data in offers_data:
+            Offer.objects.create(package=offer_package, **offer_data)
+
+        return offer_package
