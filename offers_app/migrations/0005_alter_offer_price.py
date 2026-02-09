@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('offers_app', '0004_alter_offerpackage_user'),
+        ("offers_app", "0004_alter_offerpackage_user"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='offer',
-            name='price',
+            model_name="offer",
+            name="price",
             field=models.FloatField(blank=True, null=True),
         ),
     ]
