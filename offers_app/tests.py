@@ -142,7 +142,8 @@ class TestOfferPackageViewSet(APITestCase):
             result_data["description"], self.offer_package.description
         )
         self.assertEqual(result_data["image"], self.offer_package.image)
-        self.assertEqual(result_data["min_price"], 35.0)
+        print(result_data["min_price"])
+        self.assertEqual(result_data["min_price"], 35)
         self.assertEqual(result_data["min_delivery_time"], 3)
         self.assertEqual(
             result_data["user_details"],

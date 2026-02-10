@@ -77,7 +77,7 @@ class RetrieveOfferSerializer(serializers.ModelSerializer):
 
 
 class BaseOfferPackageSerializer(serializers.ModelSerializer):
-    min_price = serializers.SerializerMethodField()
+    min_price = PriceField(max_digits=10, decimal_places=2)
     min_delivery_time = serializers.IntegerField()
 
     class Meta:
@@ -93,13 +93,6 @@ class BaseOfferPackageSerializer(serializers.ModelSerializer):
             "min_price",
             "min_delivery_time",
         ]
-
-    def get_min_price(self, obj):
-        offers = obj.offers.all()
-        if not offers:
-            return None
-        min_price = min(offer.price for offer in offers)
-        return int(min_price) if min_price % 1 == 0 else min_price
 
 
 class ListOfferPackageSerializer(BaseOfferPackageSerializer):

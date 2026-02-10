@@ -40,7 +40,8 @@ class OffersViewSet(ModelViewSet):
         """
         queryset = OfferPackage.objects.all().order_by("-created_at")
         queryset = queryset.annotate(
-            min_delivery_time=Min("offers__delivery_time_in_days")
+            min_delivery_time=Min("offers__delivery_time_in_days"),
+            min_price=Min("offers__price"),
         )
         queryset = queryset.annotate(min_price=Min("offers__price"))
         query_params = [
