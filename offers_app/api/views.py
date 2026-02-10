@@ -3,6 +3,7 @@ from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
+from auth_app.api.permissions import IsBusinessUser, IsOfferOwner
 from offers_app.api.pagination import (
     OfferPackageSetPagination,
 )
@@ -66,7 +67,10 @@ class OffersViewSet(ModelViewSet):
             return [AllowAny()]
 
         if self.action == "create":
-            return [AllowAny()]
+            return [IsAuthenticated(), IsBusinessUser()]
+
+        if self.action == "partial_update":
+            return [IsAuthenticated(), IsOfferOwner()]
 
         return super().get_permissions()
 

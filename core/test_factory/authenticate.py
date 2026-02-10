@@ -25,3 +25,11 @@ class TestDataFactory:
 
         client.force_authenticate(user=user)
         return client, user
+
+    @staticmethod
+    def authenticate_user(user):
+        from rest_framework.test import APIClient
+
+        client = APIClient()
+        client.force_authenticate(user=user)
+        return client

@@ -1,5 +1,3 @@
-import json
-
 from django.http import HttpResponse
 from django.urls import reverse
 from rest_framework import status
@@ -13,11 +11,14 @@ from offers_app.models import Offer, OfferPackage
 
 class TestOfferPackageViewSet(APITestCase):
     def setUp(self):
+        business_user = {
+            "username": "john_doe",
+            "email": "john@example.com",
+            "first_name": "John",
+            "last_name": "Doe",
+        }
         self.client, self.user = TestDataFactory.create_authenticated_client(
-            username="john_doe",
-            email="john@example.com",
-            first_name="John",
-            last_name="Doe",
+            **business_user
         )
 
         self.business_user_profile = UserProfile.objects.create(
@@ -30,12 +31,32 @@ class TestOfferPackageViewSet(APITestCase):
             working_hours="5-17",
         )
 
-        user_2 = User.objects.create(
+        business_user_2 = {
+            "username": "sarah_miller",
+            "email": "sarah.miller@example.com",
+            "first_name": "Sarah",
+            "last_name": "Miller",
+        }
+
+        self.business_user_2 = User.objects.create(**business_user_2)
+
+        self.customer_user = User.objects.create(
             username="exampleUsername",
             email="username@example.com",
             first_name="Example",
             last_name="Username",
         )
+
+        self.customer_user_profile = UserProfile.objects.create(
+            user=self.customer_user,
+            type="customer",
+            tel="123456789",
+            location="Berlin",
+            description="Business User",
+            file="laughing.jpg",
+            working_hours="5-17",
+        )
+
         self.offer_package = OfferPackage.objects.create(
             user=self.user, title="Package Title"
         )
@@ -58,7 +79,7 @@ class TestOfferPackageViewSet(APITestCase):
             package=self.offer_package,
         )
         offer_package_2 = OfferPackage.objects.create(
-            user=user_2, title="Advanced Title"
+            user=self.business_user_2, title="Advanced Title"
         )
         Offer.objects.create(
             title="Offer Title",
@@ -81,7 +102,7 @@ class TestOfferPackageViewSet(APITestCase):
 
     def test_offer_retrieve_ok(self):
         url = reverse("offerpackage-detail", None, kwargs={"pk": 1})
-        response: HttpResponse = self.client.get(url)
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data["user"], self.offer_package.user.id)  # type: ignore
@@ -126,9 +147,9 @@ class TestOfferPackageViewSet(APITestCase):
         self.assertEqual(
             result_data["user_details"],
             {
-                "first_name": "Example",
-                "last_name": "Username",
-                "username": "exampleUsername",
+                "first_name": "Sarah",
+                "last_name": "Miller",
+                "username": "sarah_miller",
             },
         )
         self.assertEqual(
@@ -297,6 +318,48 @@ class TestOfferPackageViewSet(APITestCase):
             OfferPackage.objects.all().filter(id=expected_data["id"]).first()
         )
 
+    def test_offer_create_not_business_user(self):
+        self.client = TestDataFactory.authenticate_user(self.customer_user)
+        url = reverse("offerpackage-list")
+        offer = {
+            "title": "Grafikdesign-Paket",
+            "image": None,
+            "description": "Ein umfassendes Grafikdesign-Paket für Unternehmen.",
+            "details": [
+                {
+                    "title": "Basic Design",
+                    "revisions": 2,
+                    "delivery_time_in_days": 5,
+                    "price": 100,
+                    "features": ["Logo Design", "Visitenkarte"],
+                    "offer_type": "basic",
+                },
+                {
+                    "title": "Standard Design",
+                    "revisions": 5,
+                    "delivery_time_in_days": 7,
+                    "price": 200,
+                    "features": ["Logo Design", "Visitenkarte", "Briefpapier"],
+                    "offer_type": "standard",
+                },
+                {
+                    "title": "Premium Design",
+                    "revisions": 10,
+                    "delivery_time_in_days": 10,
+                    "price": 500,
+                    "features": [
+                        "Logo Design",
+                        "Visitenkarte",
+                        "Briefpapier",
+                        "Flyer",
+                    ],
+                    "offer_type": "premium",
+                },
+            ],
+        }
+        response = self.client.post(url, offer, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)  # type: ignore
+
     def test_offer_update_ok(self):
         url = reverse("offerpackage-detail", kwargs={"pk": 1})
         patch_data = {
@@ -345,6 +408,25 @@ class TestOfferPackageViewSet(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data, expected_data)
+
+    def test_offer_update_not_offer_owner(self):
+        self.client = TestDataFactory.authenticate_user(self.business_user_2)
+        url = reverse("offerpackage-detail", kwargs={"pk": 1})
+        patch_data = {
+            "title": "Updated Grafikdesign-Paket",
+            "details": [
+                {
+                    "title": "Basic Design Updated",
+                    "revisions": 3,
+                    "delivery_time_in_days": 6,
+                    "price": 120,
+                    "features": ["Logo Design", "Flyer"],
+                    "offer_type": "basic",
+                }
+            ],
+        }
+        response = self.client.patch(url, patch_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)  # type: ignore
 
 
 class TestOfferDetailsView(APITestCase):

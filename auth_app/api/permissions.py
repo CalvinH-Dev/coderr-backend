@@ -16,3 +16,12 @@ class IsBusinessUser(BasePermission):
             return True
 
         return False
+
+
+class IsOfferOwner(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+        if not user:
+            return False
+
+        return obj.user.id == user.id
