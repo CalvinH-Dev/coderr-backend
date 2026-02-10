@@ -1,8 +1,8 @@
+from django.db.models import Min
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
-from auth_app.api.permissions import IsBusinessUser
 from offers_app.api.pagination import (
     OfferPackageSetPagination,
 )
@@ -12,9 +12,10 @@ from offers_app.api.query import (
     filter_min_price,
     filter_search,
     get_query_param_values,
+    order_queryset,
 )
 from offers_app.api.serializers import (
-    CreateOfferPackageSerializer,
+    CreateOrUpdateOfferPackageSerializer,
     ListOfferPackageSerializer,
     RetrieveOfferPackageSerializer,
     RetrieveOfferSerializer,
@@ -37,11 +38,16 @@ class OffersViewSet(ModelViewSet):
         by filtering against a `username` query parameter in the URL.
         """
         queryset = OfferPackage.objects.all().order_by("-created_at")
+        queryset = queryset.annotate(
+            min_delivery_time=Min("offers__delivery_time_in_days")
+        )
+        queryset = queryset.annotate(min_price=Min("offers__price"))
         query_params = [
             "creator_id",
             "min_price",
             "max_delivery_time",
             "search",
+            "ordering",
         ]
         query_param_values = get_query_param_values(self.request, query_params)
         queryset = filter_creator(queryset, query_param_values["creator_id"])
@@ -50,6 +56,7 @@ class OffersViewSet(ModelViewSet):
             queryset, query_param_values["max_delivery_time"]
         )
         queryset = filter_search(queryset, query_param_values["search"])
+        queryset = order_queryset(queryset, query_param_values["ordering"])
         return queryset
 
     def get_permissions(self):
@@ -68,6 +75,6 @@ class OffersViewSet(ModelViewSet):
             return ListOfferPackageSerializer
         if self.action == "retrieve":
             return RetrieveOfferPackageSerializer
-        if self.action == "create":
-            return CreateOfferPackageSerializer
+        if self.action in ("create", "partial_update"):
+            return CreateOrUpdateOfferPackageSerializer
         return RetrieveOfferPackageSerializer

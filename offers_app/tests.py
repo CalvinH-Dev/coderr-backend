@@ -1,3 +1,5 @@
+import json
+
 from django.http import HttpResponse
 from django.urls import reverse
 from rest_framework import status
@@ -40,6 +42,7 @@ class TestOfferPackageViewSet(APITestCase):
         Offer.objects.create(
             title="Offer Title",
             delivery_time_in_days=5,
+            revisions=5,
             price=10,
             offer_type="basic",
             features=["WebDev", "Anderes"],
@@ -48,8 +51,9 @@ class TestOfferPackageViewSet(APITestCase):
         Offer.objects.create(
             title="Offer Title 2",
             delivery_time_in_days=10,
+            revisions=3,
             price=20,
-            offer_type="basic",
+            offer_type="standard",
             features=["WebDev", "Anderes"],
             package=self.offer_package,
         )
@@ -59,6 +63,7 @@ class TestOfferPackageViewSet(APITestCase):
         Offer.objects.create(
             title="Offer Title",
             delivery_time_in_days=3,
+            revisions=2,
             price=35,
             offer_type="basic",
             features=["WebDev", "Anderes"],
@@ -67,8 +72,9 @@ class TestOfferPackageViewSet(APITestCase):
         Offer.objects.create(
             title="Offer Title 2",
             delivery_time_in_days=15,
+            revisions=10,
             price=50,
-            offer_type="basic",
+            offer_type="standard",
             features=["WebDev", "Anderes"],
             package=offer_package_2,
         )
@@ -136,27 +142,72 @@ class TestOfferPackageViewSet(APITestCase):
         self.assertIsNotNone(result_data["created_at"])
         self.assertIsNotNone(result_data["updated_at"])
 
-    def test_offer_list_filtering(self):
+    def test_offer_list_filter_by_creator_id_1(self):
         self.client.force_authenticate(user=None)  # type: ignore
-        url_1 = reverse("offerpackage-list") + "?creator_id=1"
-        url_2 = reverse("offerpackage-list") + "?creator_id=2"
-        url_min_price = reverse("offerpackage-list") + "?min_price=25"
-        url_search = reverse("offerpackage-list") + "?search=Advanced"
-        response_1 = self.client.get(url_1)
-        response_2 = self.client.get(url_2)
-        response_min_price = self.client.get(url_min_price)
-        response_search = self.client.get(url_search)
-        self.assertEqual(response_1.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_2.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_min_price.status_code, status.HTTP_200_OK)
-        data_1 = response_1.json()
-        data_2 = response_2.json()
-        data_min_price = response_min_price.json()
-        data_search = response_search.json()
-        self.assertEqual(data_1["count"], 1)
-        self.assertEqual(data_2["count"], 1)
-        self.assertEqual(data_min_price["count"], 1)
-        self.assertEqual(data_search["count"], 1)
+        url = reverse("offerpackage-list") + "?creator_id=1"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(data["count"], 1)
+
+    def test_offer_list_filter_by_creator_id_2(self):
+        self.client.force_authenticate(user=None)  # type: ignore
+        url = reverse("offerpackage-list") + "?creator_id=2"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(data["count"], 1)
+
+    def test_offer_list_filter_by_min_price(self):
+        self.client.force_authenticate(user=None)  # type: ignore
+        url = reverse("offerpackage-list") + "?min_price=25"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(data["count"], 1)
+
+    def test_offer_list_filter_by_search(self):
+        self.client.force_authenticate(user=None)  # type: ignore
+        url = reverse("offerpackage-list") + "?search=Advanced"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(data["count"], 1)
+
+    def test_offer_list_filter_by_max_delivery_time(self):
+        self.client.force_authenticate(user=None)  # type: ignore
+        url = reverse("offerpackage-list") + "?max_delivery_time=5"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(data["count"], 2)
+
+    def test_offer_list_order_by_min_price(self):
+        self.client.force_authenticate(user=None)  # type: ignore
+        url = reverse("offerpackage-list") + "?ordering=min_price"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(data["count"], 2)
+        self.assertEqual(data["results"][0]["id"], 1)
+        self.assertEqual(data["results"][1]["id"], 2)
+
+    def test_offer_list_order_by_updated_at(self):
+        self.client.force_authenticate(user=None)  # type: ignore
+        url = reverse("offerpackage-list") + "?ordering=updated_at"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(data["count"], 2)
+        self.assertEqual(data["results"][0]["id"], 2)
+        self.assertEqual(data["results"][1]["id"], 1)
 
     def test_offer_create_ok(self):  # type: ignore
         offer = {
@@ -239,6 +290,59 @@ class TestOfferPackageViewSet(APITestCase):
                 },
             ],
         }
+        data = response.json()
+        self.assertEqual(data, expected_data)
+        self.assertEqual(OfferPackage.objects.all().count(), 3)
+        self.assertIsNotNone(
+            OfferPackage.objects.all().filter(id=expected_data["id"]).first()
+        )
+
+    def test_offer_update_ok(self):
+        url = reverse("offerpackage-detail", kwargs={"pk": 1})
+        patch_data = {
+            "title": "Updated Grafikdesign-Paket",
+            "details": [
+                {
+                    "title": "Basic Design Updated",
+                    "revisions": 3,
+                    "delivery_time_in_days": 6,
+                    "price": 120,
+                    "features": ["Logo Design", "Flyer"],
+                    "offer_type": "basic",
+                }
+            ],
+        }
+        response = self.client.patch(url, patch_data, format="json")
+        expected_data = {
+            "id": 1,
+            "title": "Updated Grafikdesign-Paket",
+            "image": None,
+            "description": "",
+            "details": [
+                {
+                    "id": 1,
+                    "title": "Basic Design Updated",
+                    "revisions": 3,
+                    "delivery_time_in_days": 6,
+                    "price": 120,
+                    "features": ["Logo Design", "Flyer"],
+                    "offer_type": "basic",
+                },
+                {
+                    "id": 2,
+                    "title": "Offer Title 2",
+                    "revisions": 3,
+                    "delivery_time_in_days": 10,
+                    "price": 20,
+                    "features": [
+                        "WebDev",
+                        "Anderes",
+                    ],
+                    "offer_type": "standard",
+                },
+            ],
+        }
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         self.assertEqual(data, expected_data)
 

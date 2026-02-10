@@ -1,10 +1,17 @@
 from django.urls import reverse
 from rest_framework import serializers
-from rest_framework.authtoken.admin import User
 from rest_framework.fields import CurrentUserDefault
 
 from auth_app.api.serializers import UserDetailsSerializer
 from offers_app.models import Offer, OfferPackage
+
+
+class PriceField(serializers.DecimalField):
+    def to_representation(self, value):
+        value = super().to_representation(value)
+        if value is not None and float(value) == int(float(value)):
+            return int(float(value))
+        return value
 
 
 class BaseOfferSerializer(serializers.ModelSerializer):
@@ -33,7 +40,9 @@ class BaseOfferSerializerShortURL(BaseOfferSerializer):
         return url.removeprefix("/api")
 
 
-class CreateOfferSerializer(serializers.ModelSerializer):
+class CreateOrUpdateOfferSerializer(serializers.ModelSerializer):
+    price = PriceField(max_digits=10, decimal_places=2)
+
     class Meta:
         model = Offer
         fields = [
@@ -69,7 +78,7 @@ class RetrieveOfferSerializer(serializers.ModelSerializer):
 
 class BaseOfferPackageSerializer(serializers.ModelSerializer):
     min_price = serializers.SerializerMethodField()
-    min_delivery_time = serializers.SerializerMethodField()
+    min_delivery_time = serializers.IntegerField()
 
     class Meta:
         model = OfferPackage
@@ -92,12 +101,6 @@ class BaseOfferPackageSerializer(serializers.ModelSerializer):
         min_price = min(offer.price for offer in offers)
         return int(min_price) if min_price % 1 == 0 else min_price
 
-    def get_min_delivery_time(self, obj):
-        offers = obj.offers.all()
-        if not offers:
-            return None
-        return min(offer.delivery_time_in_days for offer in offers)
-
 
 class ListOfferPackageSerializer(BaseOfferPackageSerializer):
     details = BaseOfferSerializerShortURL(
@@ -119,19 +122,19 @@ class RetrieveOfferPackageSerializer(BaseOfferPackageSerializer):
         fields = BaseOfferPackageSerializer.Meta.fields + ["details"]
 
 
-class CreateOfferPackageSerializer(serializers.ModelSerializer):
+class CreateOrUpdateOfferPackageSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=CurrentUserDefault(), write_only=True
     )
     image = serializers.ImageField(required=False, allow_null=True)
-    details = CreateOfferSerializer(many=True, source="offers")
+    details = CreateOrUpdateOfferSerializer(many=True, source="offers")
 
     class Meta:
         model = OfferPackage
         fields = ["id", "user", "title", "image", "description", "details"]
 
     def create(self, validated_data):
-        offers_data = validated_data.pop("offers")
+        offers_data = validated_data.pop("offers", None)
 
         offer_package = OfferPackage.objects.create(**validated_data)
 
@@ -139,3 +142,17 @@ class CreateOfferPackageSerializer(serializers.ModelSerializer):
             Offer.objects.create(package=offer_package, **offer_data)
 
         return offer_package
+
+    def update(self, instance, validated_data):
+        offer_data = validated_data.pop("offers", None)
+
+        if offer_data:
+            for updated_offer in offer_data:
+                for offer in instance.offers.all():
+                    if offer.offer_type == updated_offer.get("offer_type"):
+                        for key, value in updated_offer.items():
+                            setattr(offer, key, value)
+                        offer.save()
+                        break
+
+        return super().update(instance, validated_data)

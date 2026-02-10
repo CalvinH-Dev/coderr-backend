@@ -23,7 +23,7 @@ def filter_min_price(queryset, min_price):
 
 def filter_max_delivery_time(queryset, max_time):
     if max_time is not None:
-        queryset = queryset.filter(max_deliviery_time__lte=max_time)
+        queryset = queryset.filter(min_delivery_time__lte=max_time)
     return queryset
 
 
@@ -32,4 +32,12 @@ def filter_search(queryset, term):
         queryset = queryset.filter(
             Q(description__icontains=term) | Q(title__icontains=term)
         )
+    return queryset
+
+
+def order_queryset(queryset, term):
+    if term == "min_price":
+        return queryset.order_by("min_price")
+    if term == "updated_at":
+        return queryset.order_by("-updated_at")
     return queryset
