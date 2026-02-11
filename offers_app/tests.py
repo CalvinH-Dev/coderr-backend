@@ -10,7 +10,7 @@ from core.test_factory.authenticate import TestDataFactory
 from offers_app.models import Offer, OfferPackage
 
 
-class TestOfferPackageViewSet(APITestCase):
+class APITestCaseWithSetup(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.business_user_1 = User.objects.create_user(
@@ -137,6 +137,8 @@ class TestOfferPackageViewSet(APITestCase):
             description="Customer User 2",
         )
 
+
+class TestOfferPackageViewSet(APITestCaseWithSetup):
     def setUp(self):
         self.client = TestDataFactory.authenticate_user(self.business_user_1)
 
@@ -261,7 +263,6 @@ class TestOfferPackageViewSet(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
-        print(json.dumps(data, indent=2))
         self.assertEqual(data["results"][0]["id"], 2)
         self.assertEqual(data["results"][1]["id"], 1)
 
@@ -439,6 +440,7 @@ class TestOfferDetailsView(APITestCase):
         cls.offer = Offer.objects.create(
             title="Offer Title",
             delivery_time_in_days=5,
+            revisions=5,
             price=10,
             offer_type="basic",
             features=["WebDev", "Anderes"],
@@ -455,6 +457,7 @@ class TestOfferDetailsView(APITestCase):
         data = response.json()
         self.assertEqual(data["id"], self.offer.id)
         self.assertEqual(data["title"], self.offer.title)
+        self.assertEqual(data["revisions"], self.offer.revisions)
         self.assertEqual(
             data["delivery_time_in_days"], self.offer.delivery_time_in_days
         )

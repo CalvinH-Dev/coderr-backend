@@ -16,6 +16,8 @@ class Order(models.Model):
     )
 
     customer = models.ForeignKey(User, on_delete=models.CASCADE)
-    status = models.CharField(max_length=11, choices=Type.choices)
+    status = models.CharField(
+        default="in_progress", blank=True, max_length=11, choices=Type.choices
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

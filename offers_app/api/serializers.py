@@ -64,7 +64,7 @@ class RetrieveOfferSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "title",
-            # "revisions",
+            "revisions",
             "delivery_time_in_days",
             "price",
             "features",
