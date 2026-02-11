@@ -162,7 +162,7 @@ class TestOfferPackageViewSet(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_offer_retrieve_not_authenticated(self):
+    def test_offer_retrieve_not_authorized(self):
         self.client.force_authenticate(user=None)
         url = reverse(
             "offerpackage-detail", kwargs={"pk": self.offer_package_1.pk}
@@ -399,6 +399,27 @@ class TestOfferPackageViewSet(APITestCase):
             ],
         }
         response = self.client.patch(url, patch_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_offer_delete_ok(self):
+        self.business_user_1.is_staff = True
+        self.business_user_1.is_superuser = True
+        self.business_user_1.save()
+        url = reverse(
+            "offerpackage-detail", kwargs={"pk": self.offer_package_1.pk}
+        )
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertIsNone(response.data)
+        self.assertFalse(
+            OfferPackage.objects.filter(pk=self.offer_package_1.pk).exists()
+        )
+
+    def test_offer_delete_forbidden(self):
+        url = reverse(
+            "offerpackage-detail", kwargs={"pk": self.offer_package_1.pk}
+        )
+        response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 

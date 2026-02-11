@@ -1,9 +1,13 @@
 from django.db.models import Min
 from rest_framework.generics import RetrieveAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
-from auth_app.api.permissions import IsBusinessUser, IsOfferOwner
+from auth_app.api.permissions import (
+    IsAdminOrStaff,
+    IsBusinessUser,
+    IsOfferOwner,
+)
 from offers_app.api.pagination import (
     OfferPackageSetPagination,
 )
@@ -72,6 +76,9 @@ class OffersViewSet(ModelViewSet):
 
         if self.action == "partial_update":
             return [IsAuthenticated(), IsOfferOwner()]
+
+        if self.action == "destroy":
+            return [IsAdminOrStaff()]
 
         return super().get_permissions()
 

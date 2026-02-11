@@ -18,6 +18,15 @@ class IsBusinessUser(BasePermission):
         return False
 
 
+class IsAdminOrStaff(BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        if not user:
+            return False
+
+        return user.is_staff or user.is_superuser
+
+
 class IsOfferOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
         user = request.user
