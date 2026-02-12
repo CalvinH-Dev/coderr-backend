@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "offers_app",
     "orders_app",
     "reviews_app",
+    "information_app",
     "django_extensions",
 ]
 
