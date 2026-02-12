@@ -115,7 +115,7 @@ class RetrieveOfferPackageSerializer(BaseOfferPackageSerializer):
         fields = BaseOfferPackageSerializer.Meta.fields + ["details"]
 
 
-class CreateOrUpdateOfferPackageSerializer(serializers.ModelSerializer):
+class BaseCreateOrUpdateOfferPackageSerialier(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=CurrentUserDefault(), write_only=True
     )
@@ -126,6 +126,46 @@ class CreateOrUpdateOfferPackageSerializer(serializers.ModelSerializer):
         model = OfferPackage
         fields = ["id", "user", "title", "image", "description", "details"]
 
+
+class CreateOfferPackageSerializer(BaseCreateOrUpdateOfferPackageSerialier):
+    class Meta(BaseCreateOrUpdateOfferPackageSerialier.Meta):
+        model = OfferPackage
+        fields = BaseCreateOrUpdateOfferPackageSerialier.Meta.fields + []
+
+    def validate_details(self, value):
+        if len(value) != 3:
+            raise serializers.ValidationError(
+                "Exactly 3 offers (basic, standard, premium) must be provided."
+            )
+        return value
+
+    def validate(self, data):
+        offers = data.get("offers", [])
+
+        if len(offers) != 3:
+            raise serializers.ValidationError(
+                {"details": "Exactly 3 offers must be provided."}
+            )
+
+        offer_types = {offer.get("offer_type") for offer in offers}
+        required_types = {"basic", "standard", "premium"}
+
+        if offer_types != required_types:
+            missing = required_types - offer_types
+            extra = offer_types - required_types
+            error_msg = []
+
+            if missing:
+                error_msg.append(f"Missing types: {', '.join(missing)}")
+            if extra:
+                error_msg.append(f"Invalid types: {', '.join(extra)}")
+
+            raise serializers.ValidationError(
+                {"details": " ".join(error_msg) or "Invalid offer_types"}
+            )
+
+        return data
+
     def create(self, validated_data):
         offers_data = validated_data.pop("offers", None)
 
@@ -135,6 +175,12 @@ class CreateOrUpdateOfferPackageSerializer(serializers.ModelSerializer):
             Offer.objects.create(package=offer_package, **offer_data)
 
         return offer_package
+
+
+class UpdateOfferPackageSerializer(BaseCreateOrUpdateOfferPackageSerialier):
+    class Meta(BaseCreateOrUpdateOfferPackageSerialier.Meta):
+        model = OfferPackage
+        fields = BaseCreateOrUpdateOfferPackageSerialier.Meta.fields + []
 
     def update(self, instance, validated_data):
         offer_data = validated_data.pop("offers", None)

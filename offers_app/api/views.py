@@ -20,10 +20,11 @@ from offers_app.api.query import (
     order_queryset,
 )
 from offers_app.api.serializers import (
-    CreateOrUpdateOfferPackageSerializer,
+    CreateOfferPackageSerializer,
     ListOfferPackageSerializer,
     RetrieveOfferPackageSerializer,
     RetrieveOfferSerializer,
+    UpdateOfferPackageSerializer,
 )
 from offers_app.models import Offer, OfferPackage
 
@@ -87,6 +88,8 @@ class OffersViewSet(ModelViewSet):
             return ListOfferPackageSerializer
         if self.action == "retrieve":
             return RetrieveOfferPackageSerializer
-        if self.action in ("create", "partial_update"):
-            return CreateOrUpdateOfferPackageSerializer
+        if self.action == "create":
+            return CreateOfferPackageSerializer
+        if self.action == "partial_update":
+            return UpdateOfferPackageSerializer
         return RetrieveOfferPackageSerializer

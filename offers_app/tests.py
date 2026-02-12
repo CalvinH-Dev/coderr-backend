@@ -390,6 +390,36 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
         self.assertEqual(len(data["details"]), 3)
         self.assertEqual(OfferPackage.objects.all().count(), 3)
 
+    def test_offer_create_wrong_offer_len(self):
+        offer = {
+            "title": "Graphics Package",
+            "image": None,
+            "description": "A comprehensive graphics package for businesses.",
+            "details": [
+                {
+                    "title": "Basic Design",
+                    "revisions": 2,
+                    "delivery_time_in_days": 5,
+                    "price": 100,
+                    "features": ["Logo Design", "Business Card"],
+                    "offer_type": "basic",
+                },
+                {
+                    "title": "Standard Design",
+                    "revisions": 5,
+                    "delivery_time_in_days": 7,
+                    "price": 200,
+                    "features": ["Logo Design", "Business Card", "Letterhead"],
+                    "offer_type": "standard",
+                },
+            ],
+        }
+
+        url = reverse("offerpackage-list")
+        response = self.client.post(url, offer, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_offer_create_not_business_user(self):
         self.client = TestDataFactory.authenticate_user(self.customer_user_1)
         url = reverse("offerpackage-list")
