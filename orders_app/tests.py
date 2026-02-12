@@ -114,3 +114,22 @@ class TestOrdersViewSet(APITestCaseWithSetup):
         self.assertIsNotNone(data.pop("created_at"))
 
         self.assertEqual(data, {}, f"Unexpected Fields: {data}")
+
+    def test_order_patch_forbidden(self):
+        order = self.order_1
+        new_status = "completed"
+        url = reverse("order-detail", kwargs={"pk": order.id})
+        post_data = {"status": new_status}
+        response = self.client.patch(url, post_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_order_patch_not_authorized(self):
+        self.client.force_authenticate(user=None)
+        order = self.order_1
+        new_status = "completed"
+        url = reverse("order-detail", kwargs={"pk": order.id})
+        post_data = {"status": new_status}
+        response = self.client.patch(url, post_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
