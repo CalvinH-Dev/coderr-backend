@@ -6,6 +6,7 @@ from rest_framework.test import APITestCase
 from auth_app.models import UserProfile
 from core.test_factory.authenticate import TestDataFactory
 from offers_app.models import Offer, OfferPackage
+from orders_app.models import Order
 
 
 class APITestCaseWithSetup(APITestCase):
@@ -30,7 +31,7 @@ class APITestCaseWithSetup(APITestCase):
         cls.offer_package_1 = OfferPackage.objects.create(
             user=cls.business_user_1, title="Web Development Package"
         )
-        Offer.objects.create(
+        cls.basic_web_offer = Offer.objects.create(
             title="Basic Web Package",
             delivery_time_in_days=5,
             revisions=2,
@@ -39,7 +40,7 @@ class APITestCaseWithSetup(APITestCase):
             features=["WebDev", "Responsive"],
             package=cls.offer_package_1,
         )
-        Offer.objects.create(
+        cls.standard_web_offer = Offer.objects.create(
             title="Standard Web Package",
             delivery_time_in_days=10,
             revisions=5,
@@ -48,7 +49,7 @@ class APITestCaseWithSetup(APITestCase):
             features=["WebDev", "Responsive", "SEO"],
             package=cls.offer_package_1,
         )
-        Offer.objects.create(
+        cls.premium_web_offer = Offer.objects.create(
             title="Premium Web Package",
             delivery_time_in_days=15,
             revisions=10,
@@ -77,7 +78,7 @@ class APITestCaseWithSetup(APITestCase):
         cls.offer_package_2 = OfferPackage.objects.create(
             user=cls.business_user_2, title="Graphic Design Package"
         )
-        Offer.objects.create(
+        cls.basic_design_offer = Offer.objects.create(
             title="Basic Design",
             delivery_time_in_days=3,
             revisions=1,
@@ -86,7 +87,7 @@ class APITestCaseWithSetup(APITestCase):
             features=["Logo", "Business Card"],
             package=cls.offer_package_2,
         )
-        Offer.objects.create(
+        cls.standard_design_offer = Offer.objects.create(
             title="Standard Design",
             delivery_time_in_days=7,
             revisions=3,
@@ -95,7 +96,7 @@ class APITestCaseWithSetup(APITestCase):
             features=["Logo", "Business Card", "Letterhead"],
             package=cls.offer_package_2,
         )
-        Offer.objects.create(
+        cls.premium_design_offer = Offer.objects.create(
             title="Premium Design",
             delivery_time_in_days=14,
             revisions=8,
@@ -133,6 +134,54 @@ class APITestCaseWithSetup(APITestCase):
             tel="444555666",
             location="Frankfurt",
             description="Customer User 2",
+        )
+
+        cls.order_1 = Order.objects.create(
+            business_user=cls.business_user_1,
+            customer_user=cls.customer_user_1,
+            title=cls.standard_web_offer.title,
+            revisions=cls.standard_web_offer.revisions,
+            delivery_time_in_days=cls.standard_web_offer.delivery_time_in_days,
+            offer_type=cls.standard_web_offer.offer_type,
+            price=cls.standard_web_offer.price,
+            features=cls.standard_web_offer.features,
+            status="in_progress",
+        )
+
+        cls.order_2 = Order.objects.create(
+            business_user=cls.business_user_1,
+            customer_user=cls.customer_user_2,
+            title=cls.basic_design_offer.title,
+            revisions=cls.basic_design_offer.revisions,
+            delivery_time_in_days=cls.basic_design_offer.delivery_time_in_days,
+            offer_type=cls.basic_design_offer.offer_type,
+            price=cls.basic_design_offer.price,
+            features=cls.basic_design_offer.features,
+            status="in_progress",
+        )
+
+        cls.order_3 = Order.objects.create(
+            business_user=cls.business_user_2,
+            customer_user=cls.customer_user_1,
+            title=cls.premium_design_offer.title,
+            revisions=cls.premium_design_offer.revisions,
+            delivery_time_in_days=cls.premium_design_offer.delivery_time_in_days,
+            offer_type=cls.premium_design_offer.offer_type,
+            price=cls.premium_design_offer.price,
+            features=cls.premium_design_offer.features,
+            status="cancelled",
+        )
+
+        cls.order_4 = Order.objects.create(
+            business_user=cls.business_user_1,
+            customer_user=cls.customer_user_2,
+            title=cls.premium_web_offer.title,
+            revisions=cls.premium_web_offer.revisions,
+            delivery_time_in_days=cls.premium_web_offer.delivery_time_in_days,
+            offer_type=cls.premium_web_offer.offer_type,
+            price=cls.premium_web_offer.price,
+            features=cls.premium_web_offer.features,
+            status="in_progress",
         )
 
 

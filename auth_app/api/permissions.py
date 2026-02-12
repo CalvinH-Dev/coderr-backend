@@ -1,21 +1,36 @@
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, IsAuthenticated
 
 from auth_app.models import UserProfile
 
 
 class IsBusinessUser(BasePermission):
     def has_permission(self, request, view):
-        user = request.user
-        if not user:
+        # Erst IsAuthenticated prüfen
+        if not IsAuthenticated().has_permission(request, view):
             return False
-        user_profile = UserProfile.objects.filter(user_id=user.id).first()
+
+        user_profile = UserProfile.objects.filter(
+            user_id=request.user.id
+        ).first()
         if not user_profile:
             return False
 
-        if user_profile.type == "business":
-            return True
+        return user_profile.type == "business"
 
-        return False
+
+class IsCustomerUser(BasePermission):
+    def has_permission(self, request, view):
+        # Erst IsAuthenticated prüfen
+        if not IsAuthenticated().has_permission(request, view):
+            return False
+
+        user_profile = UserProfile.objects.filter(
+            user_id=request.user.id
+        ).first()
+        if not user_profile:
+            return False
+
+        return user_profile.type == "customer"
 
 
 class IsAdminOrStaff(BasePermission):
@@ -25,12 +40,3 @@ class IsAdminOrStaff(BasePermission):
             return False
 
         return user.is_staff or user.is_superuser
-
-
-class IsOfferOwner(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        user = request.user
-        if not user:
-            return False
-
-        return obj.user.id == user.id

@@ -11,7 +11,12 @@ class Order(BaseOffer):
         DELETED = "deleted", "deleted"
         CANCELLED = "cancelled", "cancelled"
 
-    customer = models.ForeignKey(User, on_delete=models.CASCADE)
+    business_user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="orders_as_business"
+    )
+    customer_user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="orders_as_customer"
+    )
     status = models.CharField(
         default="in_progress",
         blank=True,

@@ -6,16 +6,7 @@ from offers_app.models import Offer
 from orders_app.models import Order
 
 
-class CreateOrderSerializer(serializers.ModelSerializer):
-    offer_detail_id = serializers.IntegerField(write_only=True)
-
-    user = serializers.HiddenField(
-        default=CurrentUserDefault(), write_only=True
-    )
-
-    customer_user = serializers.SerializerMethodField(read_only=True)
-    business_user = serializers.SerializerMethodField(read_only=True)
-
+class BaseOrderSerialier(serializers.ModelSerializer):
     title = serializers.CharField(read_only=True)
     revisions = serializers.IntegerField(read_only=True)
     delivery_time_in_days = serializers.IntegerField(read_only=True)
@@ -41,16 +32,44 @@ class CreateOrderSerializer(serializers.ModelSerializer):
             "offer_type",
         ]
 
-    def get_customer_user(self, obj):
-        return obj.customer.id
+        extra_kwargs = {
+            "business_user": {"read_only": True},
+            "customer_user": {"read_only": True},
+        }
 
-    def get_business_user(self, obj):
-        offer_id = self.initial_data.get("offer_detail_id")
-        if offer_id:
-            offer = Offer.objects.filter(id=offer_id).first()
-            if offer:
-                return offer.package.user.id
-        return None
+    # def get_customer_user(self, obj):
+    #     return obj.customer_user.id
+
+    # def get_business_user(self, obj):
+    #     return obj.business_user.id
+
+
+class PatchOrderSerializer(BaseOrderSerialier):
+    class Meta(BaseOrderSerialier.Meta):
+        model = Order
+        fields = BaseOrderSerialier.Meta.fields + []
+        read_only_fields = [
+            field
+            for field in BaseOrderSerialier.Meta.fields
+            if field != "status"
+        ]
+
+
+class CreateOrderSerializer(BaseOrderSerialier):
+    offer_detail_id = serializers.IntegerField(write_only=True)
+
+    user = serializers.HiddenField(
+        default=CurrentUserDefault(), write_only=True
+    )
+
+    class Meta(BaseOrderSerialier.Meta):
+        model = Order
+        fields = BaseOrderSerialier.Meta.fields + []
+        read_only_fields = [
+            field
+            for field in BaseOrderSerialier.Meta.fields
+            if field != "offer_detail_id"
+        ]
 
     def create(self, validated_data):
         offer_id = validated_data.pop("offer_detail_id", None)
@@ -67,5 +86,6 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         validated_data["price"] = offer.price
         validated_data["features"] = offer.features
         validated_data["offer_type"] = offer.offer_type
+        validated_data["business_user"] = offer.package.user
 
-        return Order.objects.create(**validated_data, customer=user)
+        return Order.objects.create(**validated_data, customer_user=user)

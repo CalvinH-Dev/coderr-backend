@@ -1,16 +1,16 @@
 from django.db.models import Min
 from rest_framework.generics import RetrieveAPIView
-from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
 from auth_app.api.permissions import (
     IsAdminOrStaff,
     IsBusinessUser,
-    IsOfferOwner,
 )
 from offers_app.api.pagination import (
     OfferPackageSetPagination,
 )
+from offers_app.api.permissions import IsOfferOwner
 from offers_app.api.query import (
     filter_creator,
     filter_max_delivery_time,
