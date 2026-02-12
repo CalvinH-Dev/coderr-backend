@@ -6,13 +6,21 @@ from auth_app.api.permissions import (
     IsBusinessUser,
     IsCustomerUser,
 )
-from orders_app.api.serializers import CreateOrderSerializer
+from orders_app.api.serializers import (
+    CreateOrderSerializer,
+    PatchOrderSerializer,
+)
 from orders_app.models import Order
 
 
 class OrdersViewSet(ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = CreateOrderSerializer
+
+    def get_serializer_class(self):
+        if self.action == "partial_update":
+            return PatchOrderSerializer
+        return super().get_serializer_class()
 
     def get_permissions(self):
         if self.action == "list":

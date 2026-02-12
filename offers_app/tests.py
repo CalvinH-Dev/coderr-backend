@@ -194,8 +194,9 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
             "offerpackage-detail", kwargs={"pk": self.offer_package_1.pk}
         )
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data.pop("id"), self.offer_package_1.id)
         self.assertEqual(data.pop("user"), self.offer_package_1.user.id)
         self.assertEqual(data.pop("title"), self.offer_package_1.title)
@@ -213,6 +214,7 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
     def test_offer_retrieve_wrong_id(self):
         url = reverse("offerpackage-detail", kwargs={"pk": 999})
         response = self.client.get(url)
+
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_offer_retrieve_not_authorized(self):
@@ -221,14 +223,16 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
             "offerpackage-detail", kwargs={"pk": self.offer_package_1.pk}
         )
         response = self.client.get(url)
+
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_offer_list_ok(self):
         self.client.force_authenticate(user=None)
         url = reverse("offerpackage-list")
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data.pop("count"), 2)
         self.assertEqual(data.pop("next"), None)
         self.assertEqual(data.pop("previous"), None)
@@ -273,8 +277,9 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
             + f"?creator_id={self.business_user_1.id}"
         )
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data["count"], 1)
 
     def test_offer_list_filter_by_creator_id_2(self):
@@ -284,40 +289,45 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
             + f"?creator_id={self.business_user_2.id}"
         )
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data["count"], 1)
 
     def test_offer_list_filter_by_min_price(self):
         self.client.force_authenticate(user=None)
         url = reverse("offerpackage-list") + "?min_price=85"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data["count"], 2)
 
     def test_offer_list_filter_by_search(self):
         self.client.force_authenticate(user=None)
         url = reverse("offerpackage-list") + "?search=Graphic"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data["count"], 1)
 
     def test_offer_list_filter_by_max_delivery_time(self):
         self.client.force_authenticate(user=None)
         url = reverse("offerpackage-list") + "?max_delivery_time=5"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data["count"], 2)
 
     def test_offer_list_order_by_min_price(self):
         self.client.force_authenticate(user=None)
         url = reverse("offerpackage-list") + "?ordering=min_price"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data["count"], 2)
         self.assertEqual(data["results"][0]["id"], self.offer_package_2.id)
         self.assertEqual(data["results"][1]["id"], self.offer_package_1.id)
@@ -326,8 +336,9 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
         self.client.force_authenticate(user=None)
         url = reverse("offerpackage-list") + "?ordering=updated_at"
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data["results"][0]["id"], 2)
         self.assertEqual(data["results"][1]["id"], 1)
 
@@ -371,8 +382,9 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
 
         url = reverse("offerpackage-list")
         response = self.client.post(url, offer, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
         data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(data["title"], "Graphics Package")
         self.assertEqual(data["description"], offer.get("description"))
         self.assertEqual(len(data["details"]), 3)
@@ -438,8 +450,9 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
             ],
         }
         response = self.client.patch(url, patch_data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data["title"], patch_data.get("title"))
         self.assertEqual(len(data["details"]), 3)
 
@@ -462,6 +475,7 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
             ],
         }
         response = self.client.patch(url, patch_data, format="json")
+
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_offer_delete_ok(self):
@@ -472,6 +486,7 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
             "offerpackage-detail", kwargs={"pk": self.offer_package_1.pk}
         )
         response = self.client.delete(url)
+
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertIsNone(response.data)
         self.assertFalse(
@@ -483,6 +498,7 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
             "offerpackage-detail", kwargs={"pk": self.offer_package_1.pk}
         )
         response = self.client.delete(url)
+
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -515,8 +531,9 @@ class TestOfferDetailsView(APITestCase):
     def test_offer_detail_ok(self):
         url = reverse("offer-detail", kwargs={"pk": self.offer.pk})
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data.pop("id"), self.offer.id)
         self.assertEqual(data.pop("title"), self.offer.title)
         self.assertEqual(data.pop("revisions"), self.offer.revisions)

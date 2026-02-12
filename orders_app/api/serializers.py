@@ -18,8 +18,6 @@ class BaseOrderSerialier(serializers.ModelSerializer):
         model = Order
         fields = [
             "id",
-            "offer_detail_id",
-            "user",
             "customer_user",
             "business_user",
             "status",
@@ -36,12 +34,6 @@ class BaseOrderSerialier(serializers.ModelSerializer):
             "business_user": {"read_only": True},
             "customer_user": {"read_only": True},
         }
-
-    # def get_customer_user(self, obj):
-    #     return obj.customer_user.id
-
-    # def get_business_user(self, obj):
-    #     return obj.business_user.id
 
 
 class PatchOrderSerializer(BaseOrderSerialier):
@@ -64,7 +56,10 @@ class CreateOrderSerializer(BaseOrderSerialier):
 
     class Meta(BaseOrderSerialier.Meta):
         model = Order
-        fields = BaseOrderSerialier.Meta.fields + []
+        fields = BaseOrderSerialier.Meta.fields + [
+            "offer_detail_id",
+            "user",
+        ]
         read_only_fields = [
             field
             for field in BaseOrderSerialier.Meta.fields

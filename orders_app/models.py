@@ -8,8 +8,8 @@ from offers_app.models import BaseOffer
 class Order(BaseOffer):
     class StatusType(models.TextChoices):
         IN_PROGRESS = "in_progress", "in_progress"
-        DELETED = "deleted", "deleted"
         CANCELLED = "cancelled", "cancelled"
+        COMPLETED = "completed", "completed"
 
     business_user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="orders_as_business"
