@@ -94,6 +94,8 @@ class BaseOfferPackageSerializer(serializers.ModelSerializer):
             "min_delivery_time",
         ]
 
+        read_only_fields = ["created_at", "updated_at"]
+
 
 class ListOfferPackageSerializer(BaseOfferPackageSerializer):
     details = BaseOfferSerializerShortURL(

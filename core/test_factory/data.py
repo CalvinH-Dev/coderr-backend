@@ -4,6 +4,7 @@ from rest_framework.test import APITestCase
 from auth_app.models import UserProfile
 from offers_app.models import Offer, OfferPackage
 from orders_app.models import Order
+from reviews_app.models import Review
 
 
 class APITestCaseWithSetup(APITestCase):
@@ -179,4 +180,25 @@ class APITestCaseWithSetup(APITestCase):
             price=cls.premium_web_offer.price,
             features=cls.premium_web_offer.features,
             status="completed",
+        )
+
+        cls.review_1 = Review.objects.create(
+            business_user=cls.business_user_1,
+            reviewer=cls.customer_user_1,
+            rating=5,
+            description="Excellent work! Very professional and delivered on time.",
+        )
+
+        cls.review_2 = Review.objects.create(
+            business_user=cls.business_user_1,
+            reviewer=cls.customer_user_2,
+            rating=4,
+            description="Good quality work, communication could be better.",
+        )
+
+        cls.review_3 = Review.objects.create(
+            business_user=cls.business_user_2,
+            reviewer=cls.customer_user_1,
+            rating=3,
+            description="Average experience, took longer than expected.",
         )

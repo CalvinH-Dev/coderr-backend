@@ -66,6 +66,7 @@ class BaseUserProfileBusinessSerializer(BaseUserProfileSerializer):
 class UserProfileCustomerSerializer(BaseUserProfileSerializer):
     class Meta(BaseUserProfileSerializer.Meta):
         fields = BaseUserProfileSerializer.Meta.fields + ["created_at"]
+        read_only_fields = ["created_at"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -85,6 +86,7 @@ class UserProfileBusinessSerializer(BaseUserProfileBusinessSerializer):
 
     class Meta(BaseUserProfileBusinessSerializer.Meta):
         fields = BaseUserProfileBusinessSerializer.Meta.fields + ["created_at"]
+        read_only_fields = ["created_at"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

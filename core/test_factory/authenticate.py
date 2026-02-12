@@ -37,4 +37,5 @@ class TestDataFactory:
 
         client = APIClient()
         client.force_authenticate(user=user)
+        client.authenticated_user = user
         return client

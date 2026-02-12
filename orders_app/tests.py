@@ -1,5 +1,3 @@
-import json
-
 from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
@@ -220,7 +218,6 @@ class TestOrdersViewSet(APITestCaseWithSetup):
         completed_order_count = orders.filter(status="completed").count()
 
         data = response.json()
-        print(json.dumps(data, indent=2))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             data.pop("completed_order_count"), completed_order_count

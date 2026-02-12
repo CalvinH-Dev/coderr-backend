@@ -35,6 +35,8 @@ class BaseOrderSerialier(serializers.ModelSerializer):
             "customer_user": {"read_only": True},
         }
 
+        read_only_fields = ["created_at"]
+
 
 class PatchOrderSerializer(BaseOrderSerialier):
     class Meta(BaseOrderSerialier.Meta):
