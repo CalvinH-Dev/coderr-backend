@@ -1,4 +1,9 @@
 from rest_framework.authtoken.admin import User
+from rest_framework.test import APITestCase
+
+from auth_app.models import UserProfile
+from offers_app.models import Offer, OfferPackage
+from orders_app.models import Order
 
 
 class TestDataFactory:

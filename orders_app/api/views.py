@@ -1,4 +1,8 @@
+from django.contrib.auth.models import User
+from rest_framework import status
+from rest_framework.generics import RetrieveAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from auth_app.api.permissions import (
@@ -6,6 +10,7 @@ from auth_app.api.permissions import (
     IsBusinessUser,
     IsCustomerUser,
 )
+from auth_app.models import UserProfile
 from orders_app.api.serializers import (
     CreateOrderSerializer,
     PatchOrderSerializer,
@@ -32,3 +37,29 @@ class OrdersViewSet(ModelViewSet):
         if self.action == "destroy":
             return [IsAdminOrStaff()]
         return super().get_permissions()
+
+
+class OrderCountBusinessAPIView(RetrieveAPIView):
+    def retrieve(self, request, *args, **kwargs):
+        business_user_id = kwargs["business_user_id"]
+        business_user = get_object_or_404(User, id=business_user_id)
+
+        order_count = business_user.orders_as_business.count()
+
+        return Response(
+            {"order_count": order_count}, status=status.HTTP_200_OK
+        )
+
+
+class OrderCountCompletedBusinessAPIView(RetrieveAPIView):
+    def retrieve(self, request, *args, **kwargs):
+        business_user_id = kwargs["business_user_id"]
+        business_user = get_object_or_404(User, id=business_user_id)
+
+        orders = business_user.orders_as_business.all()
+        completed_order_count = orders.filter(status="completed").count()
+
+        return Response(
+            {"completed_order_count": completed_order_count},
+            status=status.HTTP_200_OK,
+        )

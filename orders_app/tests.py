@@ -1,10 +1,11 @@
 import json
 
+from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 
 from core.test_factory.authenticate import TestDataFactory
-from offers_app.tests import APITestCaseWithSetup
+from core.test_factory.data import APITestCaseWithSetup
 from orders_app.models import Order
 
 # Create your tests here.
@@ -179,3 +180,49 @@ class TestOrdersViewSet(APITestCaseWithSetup):
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_order_count_ok(self):
+        business_user_id = 1
+        url = reverse(
+            "order-count", kwargs={"business_user_id": business_user_id}
+        )
+        response = self.client.get(url)
+        user = User.objects.all().filter(id=business_user_id).first()
+        order_count = user.orders_as_business.all().count()
+
+        data = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(data.pop("order_count"), order_count)
+        self.assertEqual(data, {}, "Response contains unexpected fields")
+
+    def test_order_count_not_found(self):
+        url = reverse("order-count", kwargs={"business_user_id": 999})
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_order_count_not_authorized(self):
+        self.client.force_authenticate(user=None)
+        url = reverse("order-count", kwargs={"business_user_id": 999})
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_completed_order_count_ok(self):
+        business_user_id = 1
+        url = reverse(
+            "completed-order-count",
+            kwargs={"business_user_id": business_user_id},
+        )
+        response = self.client.get(url)
+        user = User.objects.all().filter(id=business_user_id).first()
+        orders = user.orders_as_business.all()
+        completed_order_count = orders.filter(status="completed").count()
+
+        data = response.json()
+        print(json.dumps(data, indent=2))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            data.pop("completed_order_count"), completed_order_count
+        )
+        self.assertEqual(data, {}, "Response contains unexpected fields")
