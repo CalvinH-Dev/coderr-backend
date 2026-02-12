@@ -133,3 +133,49 @@ class TestOrdersViewSet(APITestCaseWithSetup):
         response = self.client.patch(url, post_data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_order_patch_not_found(self):
+        self.client = TestDataFactory.authenticate_user(self.business_user_1)
+        url = reverse("order-detail", kwargs={"pk": 999})
+        post_data = {"status": "completed"}
+        response = self.client.patch(url, post_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_order_delete_ok(self):
+        self.client = TestDataFactory.authenticate_user(self.business_user_1)
+        self.business_user_1.is_staff = True
+        self.business_user_1.is_superuser = True
+        self.business_user_1.save()
+
+        order = self.order_1
+        url = reverse("order-detail", kwargs={"pk": order.id})
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_order_delete_not_found(self):
+        self.client = TestDataFactory.authenticate_user(self.business_user_1)
+        self.business_user_1.is_staff = True
+        self.business_user_1.is_superuser = True
+        self.business_user_1.save()
+
+        url = reverse("order-detail", kwargs={"pk": 999})
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_order_delete_not_authorized(self):
+        self.client.force_authenticate(user=None)
+        order = self.order_1
+        url = reverse("order-detail", kwargs={"pk": order.id})
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_order_delete_forbidden(self):
+        order = self.order_1
+        url = reverse("order-detail", kwargs={"pk": order.id})
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
