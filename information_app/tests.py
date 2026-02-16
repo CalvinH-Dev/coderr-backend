@@ -1,5 +1,5 @@
 from django.urls import reverse
-from rest_framework.status import HTTP_200_OK
+from rest_framework import status
 
 from core.test_factory.data import APITestCaseWithSetup
 from information_app.api.helpers import (
@@ -22,7 +22,7 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
         response = self.client.get(url)
 
         data = response.json()
-        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             data.pop("review_count"), expected_data["review_count"]
         )
@@ -36,3 +36,9 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
         self.assertEqual(data.pop("offer_count"), expected_data["offer_count"])
 
         self.assertEqual(data, {})
+
+    def test_base_info_not_authorized(self):
+        self.client.force_authenticate(user=None)
+        url = reverse("base-info")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

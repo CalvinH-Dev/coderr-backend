@@ -15,7 +15,11 @@ def get_query_param_values(request, params):
     """
     values = {}
     for param in params:
-        values[param] = request.query_params.get(param)
+        value = request.query_params.get(param)
+        if value:
+            values[param] = request.query_params.get(param)
+        else:
+            values[param] = None
 
     return values
 
