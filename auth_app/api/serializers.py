@@ -21,12 +21,26 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserDetailsSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user detail information.
+
+    Provides basic user details including first name, last name, and username.
+    """
+
     class Meta:
         model = User
         fields = ["first_name", "last_name", "username"]
 
 
 class BaseUserProfileSerializer(serializers.ModelSerializer):
+    """
+    Base serializer for user profiles.
+
+    Provides common functionality for user profile serialization including
+    file handling and automatic inclusion of related user fields in the
+    output representation.
+    """
+
     file = serializers.SerializerMethodField()
 
     class Meta:
@@ -37,11 +51,32 @@ class BaseUserProfileSerializer(serializers.ModelSerializer):
         ]
 
     def get_file(self, obj):
+        """
+        Get the filename from the file field.
+
+        Args:
+            obj (UserProfile): The user profile instance.
+
+        Returns:
+            str or None: The filename if a file exists, None otherwise.
+        """
         if obj.file:
             return obj.file.name
         return None
 
     def to_representation(self, instance):
+        """
+        Convert the user profile instance to a dictionary representation.
+
+        Adds related user fields (id, username, first_name, last_name) to
+        the serialized output.
+
+        Args:
+            instance (UserProfile): The user profile instance to serialize.
+
+        Returns:
+            dict: Serialized data including user profile and related user fields.
+        """
         data = super().to_representation(instance)
         data["user"] = instance.user.id
         data["username"] = instance.user.username
@@ -51,6 +86,14 @@ class BaseUserProfileSerializer(serializers.ModelSerializer):
 
 
 class BaseUserProfileBusinessSerializer(BaseUserProfileSerializer):
+    """
+    Extended base serializer for business user profiles.
+
+    Extends BaseUserProfileSerializer with additional fields specific to
+    business users such as location, phone number, description, and
+    working hours.
+    """
+
     file = serializers.SerializerMethodField()
 
     class Meta(BaseUserProfileSerializer.Meta):
@@ -64,11 +107,29 @@ class BaseUserProfileBusinessSerializer(BaseUserProfileSerializer):
 
 
 class UserProfileCustomerSerializer(BaseUserProfileSerializer):
+    """
+    Serializer for customer user profiles.
+
+    Extends BaseUserProfileSerializer with customer-specific fields and
+    includes the user's email address in the output representation.
+    """
+
     class Meta(BaseUserProfileSerializer.Meta):
         fields = BaseUserProfileSerializer.Meta.fields + ["created_at"]
         read_only_fields = ["created_at"]
 
     def to_representation(self, instance):
+        """
+        Convert the customer profile instance to a dictionary representation.
+
+        Adds the user's email address to the serialized output.
+
+        Args:
+            instance (UserProfile): The user profile instance to serialize.
+
+        Returns:
+            dict: Serialized data including profile fields and user email.
+        """
         data = super().to_representation(instance)
         data["email"] = instance.user.email
         return data
@@ -89,6 +150,17 @@ class UserProfileBusinessSerializer(BaseUserProfileBusinessSerializer):
         read_only_fields = ["created_at"]
 
     def to_representation(self, instance):
+        """
+        Convert the business profile instance to a dictionary representation.
+
+        Adds the user's email address to the serialized output.
+
+        Args:
+            instance (UserProfile): The user profile instance to serialize.
+
+        Returns:
+            dict: Serialized data including profile fields and user email.
+        """
         data = super().to_representation(instance)
         data["email"] = instance.user.email
         return data
@@ -133,6 +205,18 @@ class RegistrationSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
     def validate(self, attrs):
+        """
+        Validate that password and repeated_password match.
+
+        Args:
+            attrs (dict): Dictionary of field values to validate.
+
+        Returns:
+            dict: Validated attributes.
+
+        Raises:
+            serializers.ValidationError: If passwords don't match.
+        """
         if attrs["password"] != attrs["repeated_password"]:
             raise serializers.ValidationError(
                 {"error": "Password and repeated password don't match"}
@@ -140,6 +224,15 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        """
+        Create a new user and associated user profile.
+
+        Args:
+            validated_data (dict): Validated data from the serializer.
+
+        Returns:
+            User: The newly created user instance.
+        """
         profile_type = validated_data.pop("type")
         validated_data.pop("repeated_password")
 
@@ -154,6 +247,18 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return user
 
     def to_representation(self, instance):
+        """
+        Convert the user instance to authentication response format.
+
+        Creates or retrieves an authentication token and returns user
+        credentials along with the token.
+
+        Args:
+            instance (User): The user instance to serialize.
+
+        Returns:
+            dict: Dictionary containing token, username, email, and user_id.
+        """
         token, created = Token.objects.get_or_create(user=instance)
         return {
             "token": token.key,
@@ -175,6 +280,18 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
+        """
+        Validate user credentials and authenticate the user.
+
+        Args:
+            attrs (dict): Dictionary containing username and password.
+
+        Returns:
+            dict: Validated attributes with authenticated user added.
+
+        Raises:
+            serializers.ValidationError: If authentication fails.
+        """
         user = authenticate_user(attrs)
         attrs["user"] = user
 

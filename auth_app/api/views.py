@@ -74,12 +74,26 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
 
 
 class BusinessProfilesView(generics.ListAPIView):
+    """
+    API view for listing business user profiles.
+
+    Provides a read-only endpoint that returns a list of all business user
+    profiles. Requires authentication to access.
+    """
+
     serializer_class = BaseUserProfileBusinessSerializer
     permission_classes = [IsAuthenticated]
     queryset = UserProfile.objects.all()
 
 
 class CustomerProfilesView(generics.ListAPIView):
+    """
+    API view for listing customer user profiles.
+
+    Provides a read-only endpoint that returns a list of all customer user
+    profiles. Requires authentication to access.
+    """
+
     serializer_class = BaseUserProfileSerializer
     permission_classes = [IsAuthenticated]
     queryset = UserProfile.objects.all()

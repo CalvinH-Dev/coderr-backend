@@ -30,19 +30,37 @@ from offers_app.models import Offer, OfferPackage
 
 
 class OfferDetailView(RetrieveAPIView):
+    """
+    API view for retrieving individual offer details.
+
+    Provides a read-only endpoint for authenticated users to view
+    detailed information about a specific offer.
+    """
+
     permission_classes = [IsAuthenticated]
     queryset = Offer.objects.all()
     serializer_class = RetrieveOfferSerializer
 
 
 class OffersViewSet(ModelViewSet):
+    """
+    ViewSet for managing offer packages.
+
+    Provides CRUD operations for offer packages with support for filtering,
+    searching, ordering, and pagination. Permissions vary by action type.
+
+    Supported query parameters:
+        - creator_id: Filter by user ID of the creator.
+        - min_price: Filter by minimum price threshold.
+        - max_delivery_time: Filter by maximum delivery time.
+        - search: Search in title and description fields.
+        - ordering: Order by 'min_price' or 'updated_at'.
+        - page_size: Amount of items per page.
+    """
+
     pagination_class = OfferPackageSetPagination
 
     def get_queryset(self):
-        """
-        Optionally restricts the returned purchases to a given user,
-        by filtering against a `username` query parameter in the URL.
-        """
         queryset = OfferPackage.objects.all().order_by("-created_at")
         queryset = queryset.annotate(
             min_delivery_time=Min("offers__delivery_time_in_days"),

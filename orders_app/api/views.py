@@ -10,7 +10,6 @@ from auth_app.api.permissions import (
     IsBusinessUser,
     IsCustomerUser,
 )
-from auth_app.models import UserProfile
 from orders_app.api.serializers import (
     CreateOrderSerializer,
     PatchOrderSerializer,
@@ -19,6 +18,14 @@ from orders_app.models import Order
 
 
 class OrdersViewSet(ModelViewSet):
+    """
+    ViewSet for managing orders.
+
+    Provides CRUD operations for orders with role-based permissions.
+    Customer users can create orders, business users can update order status,
+    and admin/staff can delete orders.
+    """
+
     queryset = Order.objects.all()
     serializer_class = CreateOrderSerializer
 
@@ -40,6 +47,13 @@ class OrdersViewSet(ModelViewSet):
 
 
 class OrderCountBusinessAPIView(RetrieveAPIView):
+    """
+    API view for retrieving total order count for a business user.
+
+    Provides an endpoint to get the total number of orders associated
+    with a specific business user.
+    """
+
     def retrieve(self, request, *args, **kwargs):
         business_user_id = kwargs["business_user_id"]
         business_user = get_object_or_404(User, id=business_user_id)
@@ -52,6 +66,13 @@ class OrderCountBusinessAPIView(RetrieveAPIView):
 
 
 class OrderCountCompletedBusinessAPIView(RetrieveAPIView):
+    """
+    API view for retrieving completed order count for a business user.
+
+    Provides an endpoint to get the number of completed orders for a
+    specific business user.
+    """
+
     def retrieve(self, request, *args, **kwargs):
         business_user_id = kwargs["business_user_id"]
         business_user = get_object_or_404(User, id=business_user_id)

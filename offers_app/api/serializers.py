@@ -7,14 +7,28 @@ from offers_app.models import Offer, OfferPackage
 
 
 class PriceField(serializers.DecimalField):
+    """
+    Custom decimal field for price representation.
+
+    Converts decimal prices to integers when the value is a whole number,
+    otherwise returns as float.
+    """
+
     def to_representation(self, value):
         value = super().to_representation(value)
         if value is not None and float(value) == int(float(value)):
             return int(float(value))
-        return value
+        return float(value)
 
 
 class BaseOfferSerializer(serializers.ModelSerializer):
+    """
+    Base serializer for offer objects.
+
+    Provides basic offer information with a hyperlinked URL to the
+    offer detail endpoint.
+    """
+
     url = serializers.HyperlinkedIdentityField(
         view_name="offer-detail",
         read_only=True,
@@ -29,6 +43,13 @@ class BaseOfferSerializer(serializers.ModelSerializer):
 
 
 class BaseOfferSerializerShortURL(BaseOfferSerializer):
+    """
+    Base offer serializer with shortened URL format.
+
+    Extends BaseOfferSerializer to provide URLs without the '/api' prefix
+    for cleaner frontend routing.
+    """
+
     url = serializers.SerializerMethodField(read_only=True)
 
     class Meta(BaseOfferSerializer.Meta):
@@ -36,11 +57,27 @@ class BaseOfferSerializerShortURL(BaseOfferSerializer):
         fields = BaseOfferSerializer.Meta.fields + []
 
     def get_url(self, obj):
+        """
+        Generate a shortened URL for the offer detail endpoint.
+
+        Args:
+            obj (Offer): The offer instance.
+
+        Returns:
+            str: URL path with '/api' prefix removed.
+        """
         url = reverse("offer-detail", kwargs={"pk": obj.pk})
         return url.removeprefix("/api")
 
 
 class CreateOrUpdateOfferSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating or updating individual offers.
+
+    Handles offer data input including title, pricing, delivery time,
+    and features.
+    """
+
     price = PriceField(max_digits=10, decimal_places=2)
 
     class Meta:
@@ -57,6 +94,13 @@ class CreateOrUpdateOfferSerializer(serializers.ModelSerializer):
 
 
 class RetrieveOfferSerializer(serializers.ModelSerializer):
+    """
+    Serializer for retrieving offer details.
+
+    Provides read-only representation of offer data with formatted
+    price display.
+    """
+
     price = serializers.SerializerMethodField()
 
     class Meta:
@@ -72,11 +116,27 @@ class RetrieveOfferSerializer(serializers.ModelSerializer):
         ]
 
     def get_price(self, obj):
+        """
+        Format the price for display.
+
+        Args:
+            obj (Offer): The offer instance.
+
+        Returns:
+            int or Decimal: Integer if price is whole number, Decimal otherwise.
+        """
         price = obj.price
         return int(price) if price % 1 == 0 else price
 
 
 class BaseOfferPackageSerializer(serializers.ModelSerializer):
+    """
+    Base serializer for offer packages.
+
+    Provides common fields for offer package serialization including
+    calculated minimum price and delivery time from associated offers.
+    """
+
     min_price = PriceField(max_digits=10, decimal_places=2)
     min_delivery_time = serializers.IntegerField()
 
@@ -98,6 +158,13 @@ class BaseOfferPackageSerializer(serializers.ModelSerializer):
 
 
 class ListOfferPackageSerializer(BaseOfferPackageSerializer):
+    """
+    Serializer for listing offer packages.
+
+    Extends BaseOfferPackageSerializer with nested offer details and
+    user information for list views.
+    """
+
     details = BaseOfferSerializerShortURL(
         many=True, source="offers", read_only=True
     )
@@ -111,6 +178,13 @@ class ListOfferPackageSerializer(BaseOfferPackageSerializer):
 
 
 class RetrieveOfferPackageSerializer(BaseOfferPackageSerializer):
+    """
+    Serializer for retrieving a single offer package.
+
+    Extends BaseOfferPackageSerializer with nested offer details for
+    detailed package view.
+    """
+
     details = BaseOfferSerializer(many=True, source="offers", read_only=True)
 
     class Meta(BaseOfferPackageSerializer.Meta):
@@ -118,6 +192,14 @@ class RetrieveOfferPackageSerializer(BaseOfferPackageSerializer):
 
 
 class BaseCreateOrUpdateOfferPackageSerialier(serializers.ModelSerializer):
+    """
+    Base serializer for creating or updating offer packages.
+
+    Provides common functionality for handling offer package data with
+    nested offer creation/updates. The user field is automatically set
+    to the current authenticated user.
+    """
+
     user = serializers.HiddenField(
         default=CurrentUserDefault(), write_only=True
     )
@@ -130,6 +212,13 @@ class BaseCreateOrUpdateOfferPackageSerialier(serializers.ModelSerializer):
 
 
 class CreateOfferPackageSerializer(BaseCreateOrUpdateOfferPackageSerialier):
+    """
+    Serializer for creating new offer packages.
+
+    Validates that exactly three offers (basic, standard, premium) are
+    provided and creates the offer package with associated offers.
+    """
+
     class Meta(BaseCreateOrUpdateOfferPackageSerialier.Meta):
         model = OfferPackage
         fields = BaseCreateOrUpdateOfferPackageSerialier.Meta.fields + []
@@ -180,6 +269,13 @@ class CreateOfferPackageSerializer(BaseCreateOrUpdateOfferPackageSerialier):
 
 
 class UpdateOfferPackageSerializer(BaseCreateOrUpdateOfferPackageSerialier):
+    """
+    Serializer for updating existing offer packages.
+
+    Updates the offer package and its associated offers by matching
+    offers based on their offer_type.
+    """
+
     class Meta(BaseCreateOrUpdateOfferPackageSerialier.Meta):
         model = OfferPackage
         fields = BaseCreateOrUpdateOfferPackageSerialier.Meta.fields + []

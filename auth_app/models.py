@@ -3,6 +3,24 @@ from django.db import models
 
 
 class UserProfile(models.Model):
+    """
+    Extended user profile model for storing additional user information.
+
+    This model provides a one-to-one relationship with Django's User model
+    and stores additional profile information such as contact details,
+    account type, and business-specific fields.
+
+    Attributes:
+        user (User): One-to-one relationship with Django User model.
+        location (str): User's location or address.
+        tel (str): User's telephone number.
+        type (str): Account type (customer or business).
+        description (str): User or business description.
+        file (FileField): Profile picture or business logo.
+        working_hours (str): Business working hours (for business accounts).
+        created_at (datetime): Timestamp when the profile was created.
+    """
+
     class Type(models.TextChoices):
         """
         Predefined priority options for a user profile.

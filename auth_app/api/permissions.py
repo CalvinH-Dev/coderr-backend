@@ -4,8 +4,15 @@ from auth_app.models import UserProfile
 
 
 class IsBusinessUser(BasePermission):
+    """
+    Permission class that allows access only to authenticated business users.
+
+    This permission checks if the user is authenticated and has a UserProfile
+    with type 'business'. Access is denied if the user is not authenticated,
+    has no profile, or is not a business user.
+    """
+
     def has_permission(self, request, view):
-        # Erst IsAuthenticated prüfen
         if not IsAuthenticated().has_permission(request, view):
             return False
 
@@ -19,8 +26,15 @@ class IsBusinessUser(BasePermission):
 
 
 class IsCustomerUser(BasePermission):
+    """
+    Permission class that allows access only to authenticated customer users.
+
+    This permission checks if the user is authenticated and has a UserProfile
+    with type 'customer'. Access is denied if the user is not authenticated,
+    has no profile, or is not a customer user.
+    """
+
     def has_permission(self, request, view):
-        # Erst IsAuthenticated prüfen
         if not IsAuthenticated().has_permission(request, view):
             return False
 
@@ -34,6 +48,13 @@ class IsCustomerUser(BasePermission):
 
 
 class IsAdminOrStaff(BasePermission):
+    """
+    Permission class that allows access only to staff or superuser accounts.
+
+    This permission checks if the user has staff status or superuser privileges.
+    Access is granted if either is_staff or is_superuser is True.
+    """
+
     def has_permission(self, request, view):
         user = request.user
         if not user:

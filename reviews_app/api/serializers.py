@@ -1,6 +1,3 @@
-from sqlite3 import IntegrityError
-
-from django.forms import ValidationError
 from rest_framework import serializers
 from rest_framework.fields import CurrentUserDefault
 
@@ -8,6 +5,13 @@ from reviews_app.models import Review
 
 
 class BaseReviewSerializer(serializers.ModelSerializer):
+    """
+    Base serializer for review objects.
+
+    Provides common fields for review serialization including rating,
+    description, and user relationships.
+    """
+
     class Meta:
         model = Review
         fields = [
@@ -24,6 +28,17 @@ class BaseReviewSerializer(serializers.ModelSerializer):
 
 
 class CreateReviewSerializer(BaseReviewSerializer):
+    """
+    Serializer for creating new reviews.
+
+    Handles review creation by automatically setting the reviewer to the
+    authenticated user and preventing duplicate reviews. A user can only
+    submit one review per business user.
+
+    Additional Fields:
+        user (User): Hidden field auto-populated with current user.
+    """
+
     user = serializers.HiddenField(
         default=CurrentUserDefault(), write_only=True
     )

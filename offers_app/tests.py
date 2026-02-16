@@ -27,7 +27,7 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
             data.pop("description"), self.offer_package_1.description
         )
         self.assertEqual(data.pop("image"), self.offer_package_1.image)
-        self.assertEqual(data.pop("min_price"), 100)
+        self.assertEqual(data.pop("min_price"), 100.1)
         self.assertEqual(data.pop("min_delivery_time"), 5)
         self.assertEqual(len(data.pop("details")), 3)
         self.assertIsNotNone(data.pop("created_at"))

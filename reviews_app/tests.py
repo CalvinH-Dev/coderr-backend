@@ -142,20 +142,18 @@ class TestReviewViewSet(APITestCaseWithSetup):
 
         self.assertEqual(data, {})
 
-    # def test_review_update_bad_request(self):
-    #     user = self.client.authenticated_user
-    #     review_id_before = (
-    #         user.written_reviews.filter(business_user=1).first().id
-    #     )
-    #     review = {
-    #         "hallo": 5,
-    #     }
-    #     url = reverse("review-detail", kwargs={"pk": review_id_before})
-    #     response = self.client.patch(url, review, format="json")
-    #     data = response.json()
-    #     print(json.dumps(data, indent=2))
+    def test_review_update_bad_request(self):
+        user = self.client.authenticated_user
+        review_id_before = (
+            user.written_reviews.filter(business_user=1).first().id
+        )
+        review = {
+            "rating": 6,
+        }
+        url = reverse("review-detail", kwargs={"pk": review_id_before})
+        response = self.client.patch(url, review, format="json")
 
-    #     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_review_update_not_authorized(self):
         self.client.force_authenticate(user=None)

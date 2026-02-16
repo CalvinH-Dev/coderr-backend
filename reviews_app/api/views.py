@@ -11,6 +11,14 @@ from reviews_app.models import Review
 
 
 class ReviewsViewSet(ModelViewSet):
+    """
+    ViewSet for managing reviews.
+
+    Provides CRUD operations for reviews with role-based permissions.
+    Customer users can create reviews, and only the review creator can
+    update or delete their own reviews.
+    """
+
     serializer_class = BaseReviewSerializer
     queryset = Review.objects.all()
 

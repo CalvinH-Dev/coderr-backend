@@ -1,3 +1,11 @@
+"""
+Base test case class with pre-configured test data.
+
+This module provides a custom APITestCase class that sets up a comprehensive
+test environment with users, profiles, offers, orders, and reviews for testing
+Django REST Framework applications.
+"""
+
 from django.contrib.auth.models import User
 from rest_framework.test import APITestCase
 
@@ -8,8 +16,57 @@ from reviews_app.models import Review
 
 
 class APITestCaseWithSetup(APITestCase):
+    """
+    Extended APITestCase with pre-configured test data.
+
+    This class extends Django REST Framework's APITestCase and provides a
+    comprehensive set of test data including business users, customer users,
+    offers, orders, and reviews. All test data is created once per test class
+    using setUpTestData for improved test performance.
+
+    Class Attributes:
+        business_user_1 (User): First business user account.
+        business_profile_1 (UserProfile): Profile for first business user.
+        offer_package_1 (OfferPackage): Web development offer package.
+        basic_web_offer (Offer): Basic tier web development offer.
+        standard_web_offer (Offer): Standard tier web development offer.
+        premium_web_offer (Offer): Premium tier web development offer.
+        business_user_2 (User): Second business user account.
+        business_profile_2 (UserProfile): Profile for second business user.
+        offer_package_2 (OfferPackage): Graphic design offer package.
+        basic_design_offer (Offer): Basic tier graphic design offer.
+        standard_design_offer (Offer): Standard tier graphic design offer.
+        premium_design_offer (Offer): Premium tier graphic design offer.
+        customer_user_1 (User): First customer user account.
+        customer_profile_1 (UserProfile): Profile for first customer user.
+        customer_user_2 (User): Second customer user account.
+        customer_profile_2 (UserProfile): Profile for second customer user.
+        order_1 (Order): In-progress order for standard web package.
+        order_2 (Order): In-progress order for basic design package.
+        order_3 (Order): Cancelled order for premium design package.
+        order_4 (Order): Completed order for premium web package.
+        review_1 (Review): 5-star review for business_user_1.
+        review_2 (Review): 4-star review for business_user_1.
+        review_3 (Review): 3-star review for business_user_2.
+    """
+
     @classmethod
     def setUpTestData(cls):
+        """
+        Create test data for all test cases in the class.
+
+        This method is called once per test class to create a comprehensive
+        set of test data including users, profiles, offers, orders, and reviews.
+        The data is shared across all test methods in the class for improved
+        performance.
+
+        Creates:
+            - 2 business users with profiles and offer packages
+            - 6 offers (3 web development, 3 graphic design)
+            - 2 customer users with profiles
+            - 4 orders with different statuses
+            - 3 reviews with different ratings
+        """
         cls.business_user_1 = User.objects.create_user(
             username="john_doe",
             email="john@example.com",
@@ -33,7 +90,7 @@ class APITestCaseWithSetup(APITestCase):
             title="Basic Web Package",
             delivery_time_in_days=5,
             revisions=2,
-            price=100,
+            price=100.10,
             offer_type="basic",
             features=["WebDev", "Responsive"],
             package=cls.offer_package_1,

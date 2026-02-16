@@ -9,8 +9,8 @@ from auth_app.api.views import (
 )
 
 urlpatterns = [
-    path("registration", RegistrationView.as_view(), name="registration"),
-    path("login", LoginView.as_view(), name="login"),
+    path("registration/", RegistrationView.as_view(), name="registration"),
+    path("login/", LoginView.as_view(), name="login"),
     path(
         "profile/<int:id>/",
         ProfileDetailView.as_view(),
