@@ -17,12 +17,12 @@ urlpatterns = [
         name="profile-detail",
     ),
     path(
-        "profile/business/",
+        "profiles/business/",
         BusinessProfilesView.as_view(),
         name="profile-business-list",
     ),
     path(
-        "profile/customer/",
+        "profiles/customer/",
         CustomerProfilesView.as_view(),
         name="profile-customer-list",
     ),

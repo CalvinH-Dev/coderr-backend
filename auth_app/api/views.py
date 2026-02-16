@@ -54,7 +54,7 @@ class LoginView(ObtainAuthToken):
                 "token": token.key,
                 "username": user.username,
                 "email": user.email,
-                "user_id": user.pk,
+                "user_id": user.userprofile.pk,
             }
         )
 
