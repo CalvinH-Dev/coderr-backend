@@ -39,6 +39,7 @@ class TestOrdersViewSet(APITestCaseWithSetup):
         )
         self.assertEqual(data.pop("status"), "in_progress")
         self.assertIsNotNone(data.pop("created_at"))
+        self.assertIsNotNone(data.pop("updated_at"))
 
         self.assertEqual(data, {}, f"Unexpected Fields: {data}")
 
@@ -70,6 +71,7 @@ class TestOrdersViewSet(APITestCaseWithSetup):
         self.assertEqual(data.pop("features"), offer.features)
         self.assertEqual(data.pop("offer_type"), offer.offer_type)
         self.assertIsNotNone(data.pop("created_at"))
+        self.assertIsNotNone(data.pop("updated_at"))
 
         self.assertEqual(data, {}, f"Unexpected Fields: {data}")
 
@@ -111,6 +113,7 @@ class TestOrdersViewSet(APITestCaseWithSetup):
         self.assertEqual(data.pop("features"), order.features)
         self.assertEqual(data.pop("offer_type"), order.offer_type)
         self.assertIsNotNone(data.pop("created_at"))
+        self.assertIsNotNone(data.pop("updated_at"))
 
         self.assertEqual(data, {}, f"Unexpected Fields: {data}")
 

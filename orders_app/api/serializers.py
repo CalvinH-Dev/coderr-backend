@@ -37,6 +37,7 @@ class BaseOrderSerialier(serializers.ModelSerializer):
             "business_user",
             "status",
             "created_at",
+            "updated_at",
             "title",
             "revisions",
             "delivery_time_in_days",
@@ -50,7 +51,7 @@ class BaseOrderSerialier(serializers.ModelSerializer):
             "customer_user": {"read_only": True},
         }
 
-        read_only_fields = ["created_at"]
+        read_only_fields = ["created_at", "updated_at"]
 
 
 class PatchOrderSerializer(BaseOrderSerialier):
