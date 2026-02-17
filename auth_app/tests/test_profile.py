@@ -89,6 +89,8 @@ class RetrieveProfileTest(APITestCase):
         self.assertEqual(data["last_name"], new_data["last_name"])
         self.assertEqual(data["location"], new_data["location"])
         self.assertEqual(data["tel"], new_data["tel"])
+        self.assertEqual(data["type"], self.profile_data["type"])
+        self.assertEqual(data["file"], self.profile_data["file"])
         self.assertEqual(data["description"], new_data["description"])
         self.assertEqual(data["working_hours"], new_data["working_hours"])
         self.assertEqual(data["email"], new_data["email"])
