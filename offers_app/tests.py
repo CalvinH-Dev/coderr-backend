@@ -387,6 +387,26 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_offer_update_no_offer_type(self):
+        url = reverse(
+            "offerpackage-detail", kwargs={"pk": self.offer_package_1.pk}
+        )
+        patch_data = {
+            "title": "Updated Graphics Package",
+            "details": [
+                {
+                    "title": "Basic Design Updated",
+                    "revisions": 3,
+                    "delivery_time_in_days": 6,
+                    "price": 120,
+                    "features": ["Logo Design", "Flyer"],
+                }
+            ],
+        }
+        response = self.client.patch(url, patch_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_offer_delete_ok(self):
         url = reverse(
             "offerpackage-detail", kwargs={"pk": self.offer_package_1.pk}

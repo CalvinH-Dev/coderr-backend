@@ -1,4 +1,4 @@
-from django.forms import ValidationError
+from rest_framework.exceptions import ValidationError
 
 
 def validate_offer_type(offer_type):
