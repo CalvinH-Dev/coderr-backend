@@ -51,6 +51,10 @@ class CreateReviewSerializer(BaseReviewSerializer):
         ]
 
     def create(self, validated_data):
+        """
+        Create a review after validating no duplicate exists for
+        the business user.
+        """
         validated_data.pop("user")
         reviewer = self.context["request"].user
         validated_data["reviewer"] = reviewer

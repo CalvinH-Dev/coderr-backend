@@ -11,6 +11,7 @@ class IsOfferOwner(BasePermission):
     """
 
     def has_object_permission(self, request, view, obj):
+        """Return True if the authenticated user is the owner of the object."""
         if not request.user.is_authenticated:
             return False
 

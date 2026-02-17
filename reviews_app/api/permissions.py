@@ -11,4 +11,8 @@ class IsReviewCreator(BasePermission):
     """
 
     def has_object_permission(self, request, view, obj):
+        """
+        Return True if the authenticated user is the reviewer
+        of the object.
+        """
         return request.user.id == obj.reviewer.id

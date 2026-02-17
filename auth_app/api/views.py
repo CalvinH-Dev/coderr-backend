@@ -75,11 +75,13 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
     lookup_field = "id"
 
     def get_permissions(self):
+        """Require ownership permission for PATCH requests."""
         if self.request.method == "PATCH":
             return [IsAuthenticated(), IsProfileOwner()]
         return super().get_permissions()
 
     def get_serializer_class(self):
+        """Use update serializer for PATCH requests."""
         if self.request.method == "PATCH":
             return UpdateUserProfileSerializer
         return super().get_serializer_class()
@@ -97,6 +99,7 @@ class BusinessProfilesView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        """Return all profiles with type 'business'."""
         return UserProfile.objects.filter(type="business")
 
 
@@ -112,4 +115,5 @@ class CustomerProfilesView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        """Return all profiles with type 'customer'."""
         return UserProfile.objects.filter(type="customer")

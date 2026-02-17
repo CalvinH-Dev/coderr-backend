@@ -61,6 +61,10 @@ class OffersViewSet(ModelViewSet):
     pagination_class = OfferPackageSetPagination
 
     def get_queryset(self):
+        """
+        Return filtered, annotated, and ordered queryset based on
+        query parameters.
+        """
         queryset = OfferPackage.objects.all().order_by("-created_at")
         queryset = queryset.annotate(
             min_delivery_time=Min("offers__delivery_time_in_days"),
@@ -86,6 +90,7 @@ class OffersViewSet(ModelViewSet):
         return queryset
 
     def get_permissions(self):
+        """Return permissions based on the current action."""
         if self.action == "retrieve":
             return [IsAuthenticated()]
         if self.action == "list":
@@ -103,6 +108,10 @@ class OffersViewSet(ModelViewSet):
         return super().get_permissions()
 
     def get_serializer_class(self):
+        """
+        Return the appropriate serializer class based on
+        the current action.
+        """
         if self.action == "list":
             return ListOfferPackageSerializer
         if self.action == "retrieve":

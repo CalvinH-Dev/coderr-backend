@@ -13,6 +13,7 @@ class IsBusinessUser(BasePermission):
     """
 
     def has_permission(self, request, view):
+        """Return True if the user is authenticated and has a business profile."""
         if not IsAuthenticated().has_permission(request, view):
             return False
 
@@ -35,6 +36,7 @@ class IsCustomerUser(BasePermission):
     """
 
     def has_permission(self, request, view):
+        """Return True if the user is authenticated and has a customer profile."""
         if not IsAuthenticated().has_permission(request, view):
             return False
 
@@ -56,6 +58,7 @@ class IsAdminOrStaff(BasePermission):
     """
 
     def has_permission(self, request, view):
+        """Return True if the user has staff or superuser privileges."""
         user = request.user
         if not user:
             return False
@@ -64,7 +67,10 @@ class IsAdminOrStaff(BasePermission):
 
 
 class IsProfileOwner(BasePermission):
+    """Permission class that allows access only to the owner of a profile."""
+
     def has_object_permission(self, request, view, obj):
+        """Return True if the requesting user is the owner of the object."""
         user = request.user
 
         return user.id == obj.id

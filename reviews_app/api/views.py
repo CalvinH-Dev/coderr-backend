@@ -23,6 +23,7 @@ class ReviewsViewSet(ModelViewSet):
     queryset = Review.objects.all()
 
     def get_permissions(self):
+        """Return permissions based on the current action and user role."""
         if self.action == "create":
             return [IsAuthenticated(), IsCustomerUser()]
         if self.action == "partial_update":
@@ -32,6 +33,7 @@ class ReviewsViewSet(ModelViewSet):
         return super().get_permissions()
 
     def get_serializer_class(self):
+        """Use create serializer for create actions."""
         if self.action == "create":
             return CreateReviewSerializer
         return super().get_serializer_class()

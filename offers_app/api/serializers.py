@@ -1,4 +1,3 @@
-from django.forms import ValidationError
 from django.urls import reverse
 from rest_framework import serializers
 from rest_framework.fields import CurrentUserDefault
@@ -226,6 +225,7 @@ class CreateOfferPackageSerializer(BaseCreateOrUpdateOfferPackageSerialier):
         fields = BaseCreateOrUpdateOfferPackageSerialier.Meta.fields + []
 
     def validate_details(self, value):
+        """Validate that exactly 3 detail entries are provided."""
         if len(value) != 3:
             raise serializers.ValidationError(
                 "Exactly 3 offers (basic, standard, premium) must be provided."
@@ -233,6 +233,10 @@ class CreateOfferPackageSerializer(BaseCreateOrUpdateOfferPackageSerialier):
         return value
 
     def validate(self, data):
+        """
+        Validate that offers contain exactly the required basic,
+        standard, and premium types.
+        """
         offers = data.get("offers", [])
 
         if len(offers) != 3:
@@ -260,6 +264,7 @@ class CreateOfferPackageSerializer(BaseCreateOrUpdateOfferPackageSerialier):
         return data
 
     def create(self, validated_data):
+        """Create an OfferPackage along with its associated Offer instances."""
         offers_data = validated_data.pop("offers", None)
 
         offer_package = OfferPackage.objects.create(**validated_data)
@@ -283,6 +288,10 @@ class UpdateOfferPackageSerializer(BaseCreateOrUpdateOfferPackageSerialier):
         fields = BaseCreateOrUpdateOfferPackageSerialier.Meta.fields + []
 
     def update(self, instance, validated_data):
+        """
+        Update the OfferPackage and its matching
+        Offer instances by offer_type.
+        """
         offer_data = validated_data.pop("offers", None)
 
         if offer_data:

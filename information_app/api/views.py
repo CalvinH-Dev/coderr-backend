@@ -12,9 +12,15 @@ from information_app.api.helpers import (
 
 
 class BaseInfoAPIView(RetrieveAPIView):
+    """API view that returns general platform statistics."""
+
     permission_classes = [AllowAny]
 
     def retrieve(self, request, *args, **kwargs):
+        """
+        Return aggregated statistics including review count,
+        average rating, business profiles, and offers.
+        """
         data = {
             "review_count": get_review_count(),
             "average_rating": get_average_rating(),

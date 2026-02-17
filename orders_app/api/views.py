@@ -30,11 +30,13 @@ class OrdersViewSet(ModelViewSet):
     serializer_class = CreateOrderSerializer
 
     def get_serializer_class(self):
+        """Use patch serializer for partial update actions."""
         if self.action == "partial_update":
             return PatchOrderSerializer
         return super().get_serializer_class()
 
     def get_permissions(self):
+        """Return permissions based on the current action and user role."""
         if self.action == "list":
             return [IsAuthenticated()]
         if self.action == "create":
@@ -55,6 +57,7 @@ class OrderCountBusinessAPIView(RetrieveAPIView):
     """
 
     def retrieve(self, request, *args, **kwargs):
+        """Return the total order count for the given business user."""
         business_user_id = kwargs["business_user_id"]
         business_user = get_object_or_404(User, id=business_user_id)
 
@@ -74,6 +77,7 @@ class OrderCountCompletedBusinessAPIView(RetrieveAPIView):
     """
 
     def retrieve(self, request, *args, **kwargs):
+        """Return the completed order count for the given business user."""
         business_user_id = kwargs["business_user_id"]
         business_user = get_object_or_404(User, id=business_user_id)
 

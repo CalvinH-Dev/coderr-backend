@@ -104,6 +104,7 @@ class CreateOrderSerializer(BaseOrderSerialier):
         ]
 
     def create(self, validated_data):
+        """Create an Order by populating fields from the referenced Offer."""
         offer_id = validated_data.pop("offer_detail_id", None)
         user = validated_data.pop("user")
         offer = Offer.objects.filter(id=offer_id).first()
