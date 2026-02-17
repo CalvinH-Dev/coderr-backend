@@ -1,4 +1,53 @@
 from django.db.models import Q
+from rest_framework.exceptions import ValidationError
+
+QUERY_PARAM_TYPES = {
+    "creator_id": int,
+    "min_price": float,
+    "max_delivery_time": int,
+    "ordering": str,
+    "search": str,
+    "page_size": int,
+}
+
+
+def validate_and_cast_query_params(values):
+    """
+    Validate and cast query parameter values to their expected types.
+
+    Args:
+        values (dict): Dictionary mapping parameter names to their raw string values.
+
+    Raises:
+        ValidationError: If a value cannot be cast to the expected type.
+
+    Returns:
+        dict: Dictionary with values cast to their expected types.
+    """
+    casted = {}
+    errors = {}
+
+    for param, value in values.items():
+        if value is None:
+            casted[param] = None
+            continue
+
+        expected_type = QUERY_PARAM_TYPES.get(param)
+        if expected_type is None:
+            casted[param] = value
+            continue
+
+        try:
+            casted[param] = expected_type(value)
+        except (ValueError, TypeError):
+            errors[param] = (
+                f"Invalid value '{value}'. Expected type: {expected_type.__name__}."
+            )
+
+    if errors:
+        raise ValidationError(errors)
+
+    return casted
 
 
 def get_query_param_values(request, params):

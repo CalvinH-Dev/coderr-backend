@@ -117,6 +117,12 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data["count"], 1)
 
+    def test_offer_list_filter_by_creator_id_wrong_type(self):
+        self.client.force_authenticate(user=None)
+        url = reverse("offerpackage-list") + "?creator_id='hallo'"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_offer_list_filter_by_min_price(self):
         self.client.force_authenticate(user=None)
         url = reverse("offerpackage-list") + "?min_price=85"
@@ -125,6 +131,12 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
         data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data["count"], 2)
+
+    def test_offer_list_filter_by_min_price_wrong_type(self):
+        self.client.force_authenticate(user=None)
+        url = reverse("offerpackage-list") + "?min_price='hallo'"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_offer_list_filter_by_search(self):
         self.client.force_authenticate(user=None)
@@ -143,6 +155,12 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
         data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data["count"], 2)
+
+    def test_offer_list_filter_by_max_delivery_time_wrong_type(self):
+        self.client.force_authenticate(user=None)
+        url = reverse("offerpackage-list") + "?max_delivery_time='test'"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_offer_list_order_by_min_price(self):
         self.client.force_authenticate(user=None)

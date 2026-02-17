@@ -4,7 +4,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
 from auth_app.api.permissions import (
-    IsAdminOrStaff,
     IsBusinessUser,
 )
 from offers_app.api.pagination import (
@@ -18,6 +17,7 @@ from offers_app.api.query import (
     filter_search,
     get_query_param_values,
     order_queryset,
+    validate_and_cast_query_params,
 )
 from offers_app.api.serializers import (
     CreateOfferPackageSerializer,
@@ -75,6 +75,7 @@ class OffersViewSet(ModelViewSet):
             "ordering",
         ]
         query_param_values = get_query_param_values(self.request, query_params)
+        query_param_values = validate_and_cast_query_params(query_param_values)
         queryset = filter_creator(queryset, query_param_values["creator_id"])
         queryset = filter_min_price(queryset, query_param_values["min_price"])
         queryset = filter_max_delivery_time(
