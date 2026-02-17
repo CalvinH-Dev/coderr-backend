@@ -155,6 +155,7 @@ class TestOrdersViewSet(APITestCaseWithSetup):
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertIsNone(Order.objects.all().filter(id=order.id).first())
 
     def test_order_delete_not_found(self):
         self.client = TestDataFactory.authenticate_user(self.business_user_1)
