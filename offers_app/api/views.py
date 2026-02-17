@@ -97,7 +97,7 @@ class OffersViewSet(ModelViewSet):
             return [IsAuthenticated(), IsOfferOwner()]
 
         if self.action == "destroy":
-            return [IsAdminOrStaff()]
+            return [IsAuthenticated(), IsOfferOwner()]
 
         return super().get_permissions()
 

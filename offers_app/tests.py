@@ -370,9 +370,6 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_offer_delete_ok(self):
-        self.business_user_1.is_staff = True
-        self.business_user_1.is_superuser = True
-        self.business_user_1.save()
         url = reverse(
             "offerpackage-detail", kwargs={"pk": self.offer_package_1.pk}
         )
@@ -386,7 +383,7 @@ class TestOfferPackageViewSet(APITestCaseWithSetup):
 
     def test_offer_delete_forbidden(self):
         url = reverse(
-            "offerpackage-detail", kwargs={"pk": self.offer_package_1.pk}
+            "offerpackage-detail", kwargs={"pk": self.offer_package_2.pk}
         )
         response = self.client.delete(url)
 
