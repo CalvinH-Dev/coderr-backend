@@ -190,7 +190,9 @@ class TestOrdersViewSet(APITestCaseWithSetup):
         )
         response = self.client.get(url)
         user = User.objects.all().filter(id=business_user_id).first()
-        order_count = user.orders_as_business.all().count()
+        order_count = (
+            user.orders_as_business.all().filter(status="in_progress").count()
+        )
 
         data = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)

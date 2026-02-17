@@ -4,6 +4,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.validators import UniqueValidator
 
 from auth_app.api.authenticate_user import authenticate_user
+from auth_app.api.helpers import extract_filename
 from auth_app.models import UserProfile
 
 
@@ -171,6 +172,7 @@ class UpdateUserProfileSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(source="user.last_name")
     username = serializers.CharField(source="user.username")
     email = serializers.EmailField(source="user.email")
+    file = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
@@ -187,6 +189,18 @@ class UpdateUserProfileSerializer(serializers.ModelSerializer):
             "email",
             "created_at",
         ]
+
+    def get_file(self, obj):
+        """
+        Generate a shortened URL for the offer detail endpoint.
+
+        Args:
+            obj (Offer): The offer instance.
+
+        Returns:
+            str: URL path with domain prefix removed.
+        """
+        return extract_filename(obj.file)
 
     def update(self, instance, validated_data):
         """Update the UserProfile and its related User instance."""

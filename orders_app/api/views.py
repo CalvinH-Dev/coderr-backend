@@ -61,10 +61,11 @@ class OrderCountBusinessAPIView(RetrieveAPIView):
         business_user_id = kwargs["business_user_id"]
         business_user = get_object_or_404(User, id=business_user_id)
 
-        order_count = business_user.orders_as_business.count()
+        orders = business_user.orders_as_business.all()
+        in_progress_order_count = orders.filter(status="in_progress").count()
 
         return Response(
-            {"order_count": order_count}, status=status.HTTP_200_OK
+            {"order_count": in_progress_order_count}, status=status.HTTP_200_OK
         )
 
 
