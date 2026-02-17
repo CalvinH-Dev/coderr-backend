@@ -4,7 +4,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from auth_app.api.permissions import IsOwnerOfProfile
+from auth_app.api.permissions import IsProfileOwner
 from auth_app.api.serializers import (
     BaseUserProfileBusinessSerializer,
     BaseUserProfileSerializer,
@@ -76,7 +76,7 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
 
     def get_permissions(self):
         if self.request.method == "PATCH":
-            return [IsAuthenticated(), IsOwnerOfProfile()]
+            return [IsAuthenticated(), IsProfileOwner()]
         return super().get_permissions()
 
     def get_serializer_class(self):

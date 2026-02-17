@@ -63,7 +63,7 @@ class IsAdminOrStaff(BasePermission):
         return user.is_staff or user.is_superuser
 
 
-class IsOwnerOfProfile(BasePermission):
+class IsProfileOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
         user = request.user
 
