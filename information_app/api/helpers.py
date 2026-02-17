@@ -1,7 +1,7 @@
 from django.db.models import Avg
 
 from auth_app.models import UserProfile
-from offers_app.models import Offer
+from offers_app.models import Offer, OfferPackage
 from reviews_app.models import Review
 
 
@@ -21,4 +21,4 @@ def get_business_profile_count():
 
 
 def get_offer_count():
-    return Offer.objects.all().count()
+    return OfferPackage.objects.all().count()
