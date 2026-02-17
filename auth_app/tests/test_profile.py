@@ -26,6 +26,18 @@ class RetrieveProfileTest(APITestCase):
 
         UserProfile.objects.create(user=self.user, **self.profile_data)
 
+        self.customer_user = User.objects.create_user(
+            username="jane_doe",
+            email="jane@example.com",
+            first_name="Jane",
+            last_name="Doe",
+            password="testpassword",
+        )
+        UserProfile.objects.create(
+            user=self.customer_user,
+            type="customer",
+        )
+
     def test_retrieve_profile_ok(self):
         url = reverse("profile-detail", None, kwargs={"id": 1})
         response = self.client.get(url)
@@ -56,6 +68,74 @@ class RetrieveProfileTest(APITestCase):
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_patch_profile_ok(self):
+        url = reverse("profile-detail", kwargs={"id": 1})
+        new_data = {
+            "first_name": "Max",
+            "last_name": "Mustermann",
+            "location": "Leipzig",
+            "tel": "987654321",
+            "description": "Updated business description",
+            "working_hours": "10-18",
+            "email": "new_email@business.de",
+        }
+        response = self.client.patch(url, new_data, format="json")
+        data = response.json()
+
+        self.assertEqual(data["user"], 1)
+        self.assertEqual(data["username"], "john_doe")
+        self.assertEqual(data["first_name"], new_data["first_name"])
+        self.assertEqual(data["last_name"], new_data["last_name"])
+        self.assertEqual(data["location"], new_data["location"])
+        self.assertEqual(data["tel"], new_data["tel"])
+        self.assertEqual(data["description"], new_data["description"])
+        self.assertEqual(data["working_hours"], new_data["working_hours"])
+        self.assertEqual(data["email"], new_data["email"])
+        self.assertIsNotNone(data["created_at"])
+
+    def test_patch_profile_forbidden(self):
+        url = reverse("profile-detail", kwargs={"id": 2})
+        new_data = {
+            "first_name": "Max",
+            "last_name": "Mustermann",
+            "location": "Leipzig",
+            "tel": "987654321",
+            "description": "Updated business description",
+            "working_hours": "10-18",
+            "email": "new_email@business.de",
+        }
+        response = self.client.patch(url, new_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_patch_profile_not_found(self):
+        url = reverse("profile-detail", kwargs={"id": 999})
+        new_data = {
+            "first_name": "Max",
+            "last_name": "Mustermann",
+            "location": "Leipzig",
+            "tel": "987654321",
+            "description": "Updated business description",
+            "working_hours": "10-18",
+            "email": "new_email@business.de",
+        }
+        response = self.client.patch(url, new_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_patch_profile_not_authorized(self):
+        self.client.force_authenticate(user=None)
+        url = reverse("profile-detail", kwargs={"id": 1})
+        new_data = {
+            "first_name": "Max",
+            "last_name": "Mustermann",
+            "location": "Leipzig",
+            "tel": "987654321",
+            "description": "Updated business description",
+            "working_hours": "10-18",
+            "email": "new_email@business.de",
+        }
+        response = self.client.patch(url, new_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class RetrieveBusinessProfilesTest(APITestCase):

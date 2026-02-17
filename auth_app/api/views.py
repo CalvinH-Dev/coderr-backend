@@ -4,11 +4,13 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from auth_app.api.permissions import IsOwnerOfProfile
 from auth_app.api.serializers import (
     BaseUserProfileBusinessSerializer,
     BaseUserProfileSerializer,
     LoginSerializer,
     RegistrationSerializer,
+    UpdateUserProfileSerializer,
     UserProfileBusinessSerializer,
 )
 from auth_app.models import UserProfile
@@ -71,6 +73,16 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = UserProfile.objects.all()
     lookup_field = "id"
+
+    def get_permissions(self):
+        if self.request.method == "PATCH":
+            return [IsAuthenticated(), IsOwnerOfProfile()]
+        return super().get_permissions()
+
+    def get_serializer_class(self):
+        if self.request.method == "PATCH":
+            return UpdateUserProfileSerializer
+        return super().get_serializer_class()
 
 
 class BusinessProfilesView(generics.ListAPIView):
