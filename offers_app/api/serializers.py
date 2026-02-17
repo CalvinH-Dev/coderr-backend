@@ -1,8 +1,10 @@
+from django.forms import ValidationError
 from django.urls import reverse
 from rest_framework import serializers
 from rest_framework.fields import CurrentUserDefault
 
 from auth_app.api.serializers import UserDetailsSerializer
+from offers_app.api.helpers import validate_offer_type
 from offers_app.models import Offer, OfferPackage
 
 
@@ -285,8 +287,11 @@ class UpdateOfferPackageSerializer(BaseCreateOrUpdateOfferPackageSerialier):
 
         if offer_data:
             for updated_offer in offer_data:
+                offer_type = updated_offer.get("offer_type")
+                validate_offer_type(offer_type)
+
                 for offer in instance.offers.all():
-                    if offer.offer_type == updated_offer.get("offer_type"):
+                    if offer.offer_type == offer_type:
                         for key, value in updated_offer.items():
                             setattr(offer, key, value)
                         offer.save()
