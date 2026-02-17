@@ -94,8 +94,6 @@ class BaseUserProfileBusinessSerializer(BaseUserProfileSerializer):
     working hours.
     """
 
-    file = serializers.SerializerMethodField()
-
     class Meta(BaseUserProfileSerializer.Meta):
         model = UserProfile
         fields = BaseUserProfileSerializer.Meta.fields + [

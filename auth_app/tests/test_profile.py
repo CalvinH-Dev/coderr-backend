@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -76,11 +77,24 @@ class RetrieveBusinessProfilesTest(APITestCase):
 
         UserProfile.objects.create(user=self.user, **self.profile_data)
 
+        self.customer_user = User.objects.create_user(
+            username="jane_doe",
+            email="jane@example.com",
+            first_name="Jane",
+            last_name="Doe",
+            password="testpassword",
+        )
+        UserProfile.objects.create(
+            user=self.customer_user,
+            type="customer",
+        )
+
     def test_retrieve_business_profile_ok(self):
         url = reverse("profile-business-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
+
         self.assertEqual(data[0]["user"], 1)
         self.assertEqual(data[0]["username"], "john_doe")
         self.assertEqual(data[0]["first_name"], "John")
@@ -91,6 +105,9 @@ class RetrieveBusinessProfilesTest(APITestCase):
         self.assertEqual(data[0]["description"], "Business description")
         self.assertEqual(data[0]["working_hours"], "9-17")
         self.assertEqual(data[0]["type"], "business")
+
+        for profile in data:
+            self.assertEqual(profile["type"], "business")
 
 
 class RetrieveCustomerProfilesTest(APITestCase):
@@ -108,6 +125,18 @@ class RetrieveCustomerProfilesTest(APITestCase):
 
         UserProfile.objects.create(user=self.user, **self.profile_data)
 
+        self.business_user = User.objects.create_user(
+            username="jane_doe",
+            email="jane@example.com",
+            first_name="Jane",
+            last_name="Doe",
+            password="testpassword",
+        )
+        UserProfile.objects.create(
+            user=self.business_user,
+            type="business",
+        )
+
     def test_retrieve_business_profile_ok(self):
         url = reverse("profile-customer-list")
         response = self.client.get(url)
@@ -119,3 +148,6 @@ class RetrieveCustomerProfilesTest(APITestCase):
         self.assertEqual(data[0]["last_name"], "Doe")
         self.assertEqual(data[0]["file"], "profile_picture.jpg")
         self.assertEqual(data[0]["type"], "customer")
+
+        for profile in data:
+            self.assertEqual(profile["type"], "customer")
