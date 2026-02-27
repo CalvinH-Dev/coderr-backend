@@ -199,11 +199,15 @@ class TestReviewViewSet(APITestCaseWithSetup):
             .first()
             .id
         )
+        print(review_id_before)
 
         url = reverse("review-detail", kwargs={"pk": review_id_before})
         response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertIsNone(Review.objects.filter(id=review_id_before).first())
+        reviews = Review.objects.all().values()
+        print(json.dumps(list(reviews), indent=2, default=str))
 
     def test_review_delete_not_authorized(self):
         self.client.force_authenticate(user=None)

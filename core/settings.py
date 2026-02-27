@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "reviews_app",
     "information_app",
     "django_extensions",
+    "django_cleanup.apps.CleanupConfig",
 ]
 
 MIDDLEWARE = [

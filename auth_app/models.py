@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+from auth_app.image_helpers import profile_image_upload_path
+
 
 class UserProfile(models.Model):
     """
@@ -37,7 +39,9 @@ class UserProfile(models.Model):
     tel = models.CharField(max_length=20, blank=True, default="")
     type = models.CharField(max_length=8, choices=Type.choices)
     description = models.CharField(max_length=255, blank=True, default="")
-    file = models.FileField(upload_to="", blank=True, null=True)
+    file = models.FileField(
+        upload_to=profile_image_upload_path, blank=True, null=True
+    )
     working_hours = models.CharField(max_length=20, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
 

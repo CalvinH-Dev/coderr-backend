@@ -166,13 +166,11 @@ class UserProfileBusinessSerializer(BaseUserProfileBusinessSerializer):
 
 
 class UpdateUserProfileSerializer(serializers.ModelSerializer):
-    """Serializer for updating a user profile and its related user fields."""
-
     first_name = serializers.CharField(source="user.first_name")
     last_name = serializers.CharField(source="user.last_name")
     username = serializers.CharField(source="user.username")
     email = serializers.EmailField(source="user.email")
-    file = serializers.SerializerMethodField()
+    file = serializers.FileField(required=False)  # <-- das hier
 
     class Meta:
         model = UserProfile
@@ -191,19 +189,17 @@ class UpdateUserProfileSerializer(serializers.ModelSerializer):
         ]
 
     def get_file(self, obj):
-        """
-        Generate a shortened URL for the offer detail endpoint.
-
-        Args:
-            obj (Offer): The offer instance.
-
-        Returns:
-            str: URL path with domain prefix removed.
-        """
         return extract_filename(obj.file)
 
+    def to_representation(self, instance):
+        """Beim Lesen trotzdem nur den Dateinamen zurückgeben."""
+        data = super().to_representation(instance)
+        data["user"] = instance.id
+        if instance.file:
+            data["file"] = extract_filename(instance.file)
+        return data
+
     def update(self, instance, validated_data):
-        """Update the UserProfile and its related User instance."""
         user_data = validated_data.pop("user", {})
 
         for attr, value in user_data.items():
@@ -215,12 +211,6 @@ class UpdateUserProfileSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
-
-    def to_representation(self, instance):
-        """Return serialized data with the profile's user ID added."""
-        data = super().to_representation(instance)
-        data["user"] = instance.id
-        return data
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
