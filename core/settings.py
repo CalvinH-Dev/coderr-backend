@@ -18,14 +18,12 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-MEDIA_URL = "/"
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 load_dotenv()
+
 SECRET_KEY = os.getenv("SECRET_KEY")
 ENV = os.getenv("ENV", "dev")
 
@@ -46,7 +44,7 @@ if ENV == "prod":
     ALLOWED_HOSTS = ["apicoderr.hanisch-dev.de", "127.0.0.1", "localhost"]
 else:
     DEBUG = True
-    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
     MEDIA_URL = "/"
     CORS_ALLOWED_ORIGINS = [
         "http://127.0.0.1:5500",
@@ -81,7 +79,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
-    # "django.middleware.csrf.CsrfViewMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -152,7 +150,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = "static/"
+
+if ENV == "prod":
+    "/var/www/coderr/static/"
+else:
+    STATIC_URL = "static/"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
