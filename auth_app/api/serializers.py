@@ -42,28 +42,12 @@ class BaseUserProfileSerializer(serializers.ModelSerializer):
     output representation.
     """
 
-    file = serializers.SerializerMethodField()
-
     class Meta:
         model = UserProfile
         fields = [
             "file",
             "type",
         ]
-
-    def get_file(self, obj):
-        """
-        Get the filename from the file field.
-
-        Args:
-            obj (UserProfile): The user profile instance.
-
-        Returns:
-            str or None: The filename if a file exists, None otherwise.
-        """
-        if obj.file:
-            return obj.file.name
-        return None
 
     def to_representation(self, instance):
         """
@@ -170,7 +154,7 @@ class UpdateUserProfileSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(source="user.last_name")
     username = serializers.CharField(source="user.username")
     email = serializers.EmailField(source="user.email")
-    file = serializers.FileField(required=False)  # <-- das hier
+    file = serializers.FileField(required=False)
 
     class Meta:
         model = UserProfile

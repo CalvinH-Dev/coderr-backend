@@ -8,6 +8,7 @@ wheels/
 .env
 *.sqlite3
 .ruff_cache
+media
 
 # Virtual environments
 .venv

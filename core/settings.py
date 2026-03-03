@@ -27,14 +27,32 @@ MEDIA_URL = "/"
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
+ENV = os.getenv("ENV", "dev")
 
 if not SECRET_KEY:
     raise ValueError("SECRET_KEY is not set in the environment variables.")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = []
+
+if ENV == "prod":
+    DEBUG = False
+    MEDIA_ROOT = "/var/www/coderr/media/"
+    MEDIA_URL = "/media/"
+    CORS_ALLOWED_ORIGINS = [
+        "http://coderr.hanisch-dev.de",
+        "https://coderr.hanisch-dev.de",
+    ]
+    ALLOWED_HOSTS = ["apicoderr.hanisch-dev.de", "127.0.0.1", "localhost"]
+else:
+    DEBUG = True
+    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_URL = "/"
+    CORS_ALLOWED_ORIGINS = [
+        "http://127.0.0.1:5500",
+        "http://localhost:5173",
+    ]
+    ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -68,12 +86,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5500",
-    "http://localhost:5500",
-]
-
 
 ROOT_URLCONF = "core.urls"
 
