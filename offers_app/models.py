@@ -1,6 +1,8 @@
 from django.db import models
 from rest_framework.authtoken.admin import User
 
+from offers_app.image_helpers import offers_image_upload_path
+
 
 class BaseOffer(models.Model):
     """
@@ -62,7 +64,9 @@ class OfferPackage(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
-    image = models.FileField(upload_to="", blank=True, null=True)
+    image = models.FileField(
+        upload_to=offers_image_upload_path, blank=True, null=True
+    )
     description = models.CharField(max_length=255, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
