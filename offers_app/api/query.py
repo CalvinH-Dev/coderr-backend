@@ -165,8 +165,7 @@ def order_queryset(queryset, term):
         QuerySet: Ordered queryset or the original queryset if term is
             not recognized.
     """
-    if term == "min_price":
-        return queryset.order_by("min_price")
-    if term == "updated_at":
-        return queryset.order_by("-updated_at")
+    allowed = {"min_price", "-min_price", "updated_at", "-updated_at"}
+    if term in allowed:
+        return queryset.order_by(term)
     return queryset
