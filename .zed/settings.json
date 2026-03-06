@@ -1,0 +1,37 @@
+{
+	"format_on_save": "on",
+	"formatter": "auto",
+	"languages": {
+		"Python": {
+			"format_on_save": "on",
+			"formatter": {
+				"external": {
+					"command": "ruff",
+					"arguments": ["format", "--stdin-filename", "{buffer_path}", "-"],
+				},
+			},
+			"code_actions_on_format": {
+				"source.organizeImports.ruff": true,
+			},
+		},
+	},
+
+	"lsp": {
+		"basedpyright": {
+			"settings": {
+				"python": {
+					"analysis": {
+						"diagnosticMode": "workspace",
+						"typeCheckingMode": "false",
+						"autoImportCompletions": true,
+						"indexing": true,
+						"packageIndexDepths": [
+							{ "name": "django", "depth": 5, "includeAllSymbols": true },
+							{ "name": "rest_framework", "depth": 5, "includeAllSymbols": true },
+						],
+					},
+				},
+			},
+		},
+	},
+}
